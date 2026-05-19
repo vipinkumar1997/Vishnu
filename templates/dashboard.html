@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Remote Software Control - Dashboard</title>
+  <style>
+    :root{
+      --bg:#0d1117;
+      --card:#161b22;
+      --card2:#0f1520;
+      --text:#e6edf3;
+      --muted:#8b949e;
+      --line: rgba(255,255,255,0.08);
+      --accent:#58a6ff;
+
+      --green:#2ea043;
+      --red:#f85149;
+      --orange:#d29922;
+
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+      --radius: 14px;
+      --radius2: 12px;
+
+      --btn-bg: rgba(255,255,255,0.03);
+      --btn-border: rgba(255,255,255,0.10);
+
+      --danger-bg: rgba(248,81,73,0.10);
+      --danger-border: rgba(248,81,73,0.35);
+
+      --success-bg: rgba(46,160,67,0.10);
+      --success-border: rgba(46,160,67,0.35);
+
+      --warn-bg: rgba(210,153,34,0.10);
+      --warn-border: rgba(210,153,34,0.35);
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .page{ padding: 18px; max-width: 1200px; margin: 0 auto; }
+
+    /* Header */
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 0 18px;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      background: linear-gradient(to bottom, rgba(13,17,23,0.95), rgba(13,17,23,0.75));
+      backdrop-filter: blur(6px);
+      z-index: 10;
+    }
+    .title-wrap{ display:flex; flex-direction:column; gap:6px; }
+    .title{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      font-size: 18px;
+    }
+    .sub{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .logout{
+      text-decoration:none;
+      color: var(--text);
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      white-space: nowrap;
+    }
+    .logout:hover{ border-color: rgba(88,166,255,0.45); }
+
+    /* Top stats row */
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .stat-k{ color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .stat-v{ font-size: 22px; font-weight: 900; letter-spacing: 0.2px; }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      padding-bottom: 12px;
+    }
+
+    @media (max-width: 900px){
+      .stats{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .soft-card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .soft-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .soft-name{
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-active{ background: rgba(46,160,67,0.10); border-color: rgba(46,160,67,0.35); color: #7CFFB0; }
+    .badge-killed{ background: rgba(248,81,73,0.10); border-color: rgba(248,81,73,0.35); color: #FFB4B5; }
+    .badge-update{ background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.35); color: #FFE3B1; }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .info{
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius2);
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .info .k{ color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .info .v{ font-size: 13px; font-weight: 800; word-break: break-word; }
+
+    .info-last{ grid-column: 1 / -1; }
+
+    .note{
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius2);
+      padding: 10px;
+    }
+    .note .k{ color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    textarea{
+      width: 100%;
+      resize: vertical;
+      min-height: 56px;
+      max-height: 160px;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .btn-row{ display:flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn{
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-weight: 900;
+      font-size: 13px;
+      cursor:pointer;
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn:hover{ border-color: rgba(88,166,255,0.45); }
+
+    .btn-kill{ background: var(--danger-bg); border-color: var(--danger-border); }
+    .btn-activate{ background: var(--success-bg); border-color: var(--success-border); }
+    .btn-update{ background: var(--warn-bg); border-color: var(--warn-border); }
+
+    .inline-update{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    .inline-update input{
+      flex: 1;
+      min-width: 220px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.15);
+      color: var(--text);
+      outline: none;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .inline-update input:focus{ border-color: rgba(88,166,255,0.65); box-shadow: 0 0 0 3px rgba(88,166,255,0.18); }
+
+    .small-submit{
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--warn-border);
+      background: rgba(210,153,34,0.16);
+      color: var(--text);
+      font-weight: 900;
+      cursor:pointer;
+    }
+
+    .hint{ color: var(--muted); font-size: 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="title-wrap">
+        <div class="title">
+          <!-- dashboard icon -->
+          <span aria-hidden="true" style="display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:10px; background: rgba(88,166,255,0.14); border: 1px solid rgba(88,166,255,0.35);">▦</span>
+          <span>Remote Software Control</span>
+        </div>
+        <div class="sub">
+          Auto-refresh every 10 seconds · Last updated: <span id="lastUpdatedText">--</span>
+        </div>
+      </div>
+      <a class="logout" href="/logout">Logout</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-k">Total Softwares</div>
+        <div class="stat-v" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k" style="color: rgba(124,255,176,0.95);">Active</div>
+        <div class="stat-v" id="statActive" style="color:#7CFFB0;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k" style="color: rgba(255,180,181,0.95);">Killed</div>
+        <div class="stat-v" id="statKilled" style="color:#FFB4B5;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Last Activity</div>
+        <div class="stat-v" id="statLastActivity">--</div>
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div class="hint">Note: Admin notes UI-only hai (backend me save nahi hota).</div>
+  </div>
+
+  <script>
+    // Secret key for admin protected API calls
+    const ADMIN_SECRET = "MY_SECRET_KEY_123";
+
+    // Backend initial load (Jinja2) - optional; JS live refresh will overwrite
+    // eslint-disable-next-line
+    const initialSoftwares = {{ softwares | tojson }};
+
+    softwares = initialSoftwares || {};
+
+    const notes = {}; // software_id -> note text (UI only)
+
+    function safeStr(v){ return (v === undefined || v === null || v === '') ? '—' : String(v); }
+
+    function statusBadge(software){
+      const st = software.status;
+      if(st === 'active') return '<span class="badge badge-active">ACTIVE</span>';
+      if(st === 'killed') return '<span class="badge badge-killed">KILLED</span>';
+      if(st === 'update_available') return '<span class="badge badge-update">UPDATE AVAILABLE</span>';
+      return '<span class="badge badge-update">' + safeStr(st).toUpperCase() + '</span>';
+    }
+
+    function minutesAgo(ts){
+      if(!ts) return '—';
+      const ms = (Date.now() - (ts*1000));
+      const mins = Math.floor(ms / 60000);
+      if(mins < 1) return '0 min ago';
+      return mins + ' min ago';
+    }
+
+    function timeNowStr(){
+      const d = new Date();
+      const pad = (n)=>String(n).padStart(2,'0');
+      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    async function apiList(){
+      const res = await fetch('/api/admin/list', {
+        method: 'GET',
+        headers: { 'X-Admin-Secret': ADMIN_SECRET }
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        throw new Error(err.error || 'Failed to fetch list');
+      }
+      return await res.json();
+    }
+
+    async function postJSON(url, body){
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){
+        throw new Error(data.error || 'Request failed');
+      }
+      return data;
+    }
+
+    function computeStats(softwaresDict){
+      const values = Object.values(softwaresDict || {});
+      let total = values.length;
+      let active = values.filter(s => s.status === 'active').length;
+      let killed = values.filter(s => s.status === 'killed').length;
+      let lastTs = null;
+      for(const s of values){
+        if(typeof s.last_seen === 'number'){
+          if(lastTs === null || s.last_seen > lastTs) lastTs = s.last_seen;
+        }
+      }
+      return {
+        total,
+        active,
+        killed,
+        lastActivity: lastTs ? minutesAgo(lastTs) : '--'
+      };
+    }
+
+    function render(){
+      // stats
+      const stats = computeStats(softwares);
+      document.getElementById('statTotal').textContent = stats.total;
+      document.getElementById('statActive').textContent = stats.active;
+      document.getElementById('statKilled').textContent = stats.killed;
+      document.getElementById('statLastActivity').textContent = stats.lastActivity;
+
+      // cards
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      for(const software of Object.values(softwares || {})){
+        const softwareId = safeStr(software.software_id);
+        const machineName = safeStr(software.machine_name);
+        const version = safeStr(software.version);
+        // UI requirements: OS name, IP address
+        const osName = safeStr(software.os_name);
+        const ipAddress = safeStr(software.ip_address);
+        const lastSeenFull = software.last_seen ? new Date(software.last_seen*1000).toLocaleString() : '—';
+
+        const card = document.createElement('div');
+        card.className = 'soft-card';
+        card.innerHTML = `
+          <div class="soft-top">
+            <div>
+              <div class="soft-name">${machineName}</div>
+              <div class="sub" style="margin-top:6px;">ID: ${softwareId}</div>
+            </div>
+            ${statusBadge(software)}
+          </div>
+
+          <div class="info-grid">
+            <div class="info"><div class="k">Machine name</div><div class="v">${machineName}</div></div>
+            <div class="info"><div class="k">Version</div><div class="v">${version}</div></div>
+            <div class="info"><div class="k">OS name</div><div class="v">${osName}</div></div>
+            <div class="info"><div class="k">IP Address</div><div class="v">${ipAddress}</div></div>
+            <div class="info info-last"><div class="k">Last Seen</div><div class="v">${lastSeenFull}</div></div>
+          </div>
+
+          <div class="note">
+            <div class="k">Notes / Remark (UI only)</div>
+            <textarea placeholder="Admin note likho..." data-software-id="${softwareId}">${notes[softwareId] || ''}</textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-kill" type="button" data-action="kill">Kill</button>
+            <button class="btn btn-activate" type="button" data-action="activate">Activate</button>
+            <button class="btn btn-update" type="button" data-action="update">Push Update</button>
+          </div>
+
+          <div class="inline-update" style="display:none;" data-update-row="${softwareId}">
+            <input type="url" placeholder="https://.../update.zip" data-update-input="${softwareId}" />
+            <button class="small-submit" type="button" data-update-submit="${softwareId}">Submit</button>
+            <button class="small-submit" type="button" style="border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03);" data-update-cancel="${softwareId}">Cancel</button>
+          </div>
+        `;
+
+        // Wire note textarea
+        const ta = card.querySelector('textarea[data-software-id="'+softwareId+'"]');
+        ta.addEventListener('input', (e)=>{
+          notes[softwareId] = e.target.value;
+        });
+
+        // Wire buttons
+        card.querySelector('button[data-action="kill"]').addEventListener('click', async ()=>{
+          const reason = 'Killed from dashboard';
+          await postJSON('/api/admin/kill', { secret: ADMIN_SECRET, software_id: softwareId, reason });
+          await refresh();
+        });
+
+        card.querySelector('button[data-action="activate"]').addEventListener('click', async ()=>{
+          await postJSON('/api/admin/activate', { secret: ADMIN_SECRET, software_id: softwareId });
+          await refresh();
+        });
+
+        const updateRow = card.querySelector('div[data-update-row="'+softwareId+'"]');
+        const updateInput = card.querySelector('input[data-update-input="'+softwareId+'"]');
+        const showUpdate = ()=>{
+          updateRow.style.display = 'flex';
+          setTimeout(()=>updateInput.focus(), 0);
+        };
+
+        card.querySelector('button[data-action="update"]').addEventListener('click', showUpdate);
+
+        // submit/cancel
+        card.querySelector('button[data-update-submit="'+softwareId+'"]').addEventListener('click', async ()=>{
+          const updateUrl = (updateInput.value || '').trim();
+          if(!updateUrl){ alert('Update URL required'); return; }
+          await postJSON('/api/admin/update', { secret: ADMIN_SECRET, software_id: softwareId, update_url: updateUrl });
+          updateRow.style.display = 'none';
+          updateInput.value = '';
+          await refresh();
+        });
+
+        card.querySelector('button[data-update-cancel="'+softwareId+'"]').addEventListener('click', ()=>{
+          updateRow.style.display = 'none';
+          updateInput.value = '';
+        });
+
+        grid.appendChild(card);
+      }
+
+      // update time in header
+      document.getElementById('lastUpdatedText').textContent = timeNowStr();
+    }
+
+    async function refresh(){
+      const payload = await apiList();
+      // payload: {softwares:{...}}
+      softwares = payload.softwares || {};
+      render();
+    }
+
+    // Initial paint using passed-in dict, then live refresh loop
+    render();
+    refresh().catch((e)=>{
+      console.error(e);
+      document.getElementById('lastUpdatedText').textContent = 'Fetch failed';
+    });
+    setInterval(()=>{
+      refresh().catch((e)=>console.error(e));
+    }, 10000);
+  </script>
+</body>
+</html>
+
