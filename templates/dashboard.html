@@ -4,281 +4,609 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Remote Software Control - Dashboard</title>
+  <!-- Outfit Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root{
-      --bg:#0d1117;
-      --card:#161b22;
-      --card2:#0f1520;
-      --text:#e6edf3;
-      --muted:#8b949e;
-      --line: rgba(255,255,255,0.08);
-      --accent:#58a6ff;
+      --bg: #080c14;
+      --glass-bg: rgba(18, 26, 47, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-glow: rgba(79, 140, 255, 0.05);
+      --text: #f0f4f9;
+      --muted: #94a3b8;
+      
+      --accent: #4f8cff;
+      --accent-glow: rgba(79, 140, 255, 0.25);
+      
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.15);
+      
+      --red: #f43f5e;
+      --red-glow: rgba(244, 63, 94, 0.15);
+      
+      --orange: #f59e0b;
+      --orange-glow: rgba(245, 158, 11, 0.15);
 
-      --green:#2ea043;
-      --red:#f85149;
-      --orange:#d29922;
-
-      --shadow: 0 10px 30px rgba(0,0,0,0.35);
-
-      --radius: 14px;
-      --radius2: 12px;
-
-      --btn-bg: rgba(255,255,255,0.03);
-      --btn-border: rgba(255,255,255,0.10);
-
-      --danger-bg: rgba(248,81,73,0.10);
-      --danger-border: rgba(248,81,73,0.35);
-
-      --success-bg: rgba(46,160,67,0.10);
-      --success-border: rgba(46,160,67,0.35);
-
-      --warn-bg: rgba(210,153,34,0.10);
-      --warn-border: rgba(210,153,34,0.35);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    *{ box-sizing: border-box; }
+    *{ 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+    }
+
     body{
-      margin:0;
-      background: var(--bg);
+      background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 0.8) 0%, rgba(8, 12, 20, 1) 90%), var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 60px;
     }
 
-    .page{ padding: 18px; max-width: 1200px; margin: 0 auto; }
+    .page{ 
+      padding: 24px; 
+      max-width: 1240px; 
+      margin: 0 auto; 
+    }
 
     /* Header */
     .header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 14px 0 18px;
-      border-bottom: 1px solid var(--line);
-      position: sticky;
-      top: 0;
-      background: linear-gradient(to bottom, rgba(13,17,23,0.95), rgba(13,17,23,0.75));
-      backdrop-filter: blur(6px);
-      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 24px;
+      border-radius: var(--radius-lg);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
     }
-    .title-wrap{ display:flex; flex-direction:column; gap:6px; }
+    
+    .title-wrap{ 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    
     .title{
-      display:flex; align-items:center; gap:10px;
+      display: flex; 
+      align-items: center; 
+      gap: 12px;
       font-weight: 800;
-      letter-spacing: 0.2px;
-      font-size: 18px;
+      font-size: 22px;
+      letter-spacing: -0.5px;
     }
+
+    .title span.icon {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: var(--accent-glow);
+      border: 1px solid rgba(79, 140, 255, 0.3);
+      color: var(--accent);
+      font-weight: bold;
+    }
+    
     .sub{
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
     }
 
     .logout{
-      text-decoration:none;
+      text-decoration: none;
       color: var(--text);
       font-weight: 700;
-      padding: 9px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg);
-      white-space: nowrap;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.03);
+      transition: var(--transition);
+      cursor: pointer;
     }
-    .logout:hover{ border-color: rgba(88,166,255,0.45); }
+    .logout:hover{ 
+      border-color: var(--red); 
+      background: rgba(244, 63, 94, 0.1);
+      box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
+    }
 
     /* Top stats row */
     .stats{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(160px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
-      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .stat-card{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
     }
-    .stat-k{ color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-    .stat-v{ font-size: 22px; font-weight: 900; letter-spacing: 0.2px; }
+    .stat-card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .stat-k{ color: var(--muted); font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+    .stat-v{ font-size: 28px; font-weight: 900; letter-spacing: -0.5px; }
+
+    /* Control Bar (Search, Filters, Sort) */
+    .control-bar{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .search-input-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    .search-input-wrap::before {
+      content: "🔍";
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-tab {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-tab:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .filter-tab.active {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(79, 140, 255, 0.15);
+    }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-wrap label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .sort-select {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
 
     /* Grid */
     .grid{
-      display:grid;
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      padding-bottom: 12px;
+      gap: 20px;
     }
 
     @media (max-width: 900px){
       .stats{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
       .grid{ grid-template-columns: 1fr; }
+      .control-bar { flex-direction: column; align-items: stretch; }
+      .filter-tabs { overflow-x: auto; padding-bottom: 4px; }
     }
 
     .soft-card{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .soft-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+      transition: var(--transition);
+    }
+    .soft-card.card-active::before { background: var(--green); }
+    .soft-card.card-killed::before { background: var(--red); }
+    .soft-card.card-update_available::before { background: var(--orange); }
+
+    .soft-card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
     .soft-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
     .soft-name{
-      font-size: 15px;
-      font-weight: 900;
+      font-size: 17px;
+      font-weight: 800;
       line-height: 1.25;
-      word-break: break-word;
+      letter-spacing: -0.2px;
     }
 
     .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 14px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 900;
+      font-size: 11px;
+      font-weight: 800;
       border: 1px solid transparent;
-      white-space: nowrap;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
-    .badge-active{ background: rgba(46,160,67,0.10); border-color: rgba(46,160,67,0.35); color: #7CFFB0; }
-    .badge-killed{ background: rgba(248,81,73,0.10); border-color: rgba(248,81,73,0.35); color: #FFB4B5; }
-    .badge-update{ background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.35); color: #FFE3B1; }
+    .badge-active{ background: var(--green-glow); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+    .badge-killed{ background: var(--red-glow); border-color: rgba(244,63,94,0.3); color: #fda4af; }
+    .badge-update{ background: var(--orange-glow); border-color: rgba(245,158,11,0.3); color: #fde047; }
 
     .info-grid{
-      display:grid;
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
     .info{
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: var(--radius2);
-      padding: 10px;
-      min-width: 0;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      transition: var(--transition);
+    }
+    .info:hover {
+      background: rgba(255,255,255,0.03);
     }
 
-    .info .k{ color: var(--muted); font-size: 12px; margin-bottom: 6px; }
-    .info .v{ font-size: 13px; font-weight: 800; word-break: break-word; }
+    .info .k{ color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .info .v{ font-size: 14px; font-weight: 700; word-break: break-all; }
 
     .info-last{ grid-column: 1 / -1; }
 
     .note{
-      margin-bottom: 12px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: var(--radius2);
-      padding: 10px;
+      margin-bottom: 18px;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      position: relative;
     }
-    .note .k{ color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .note .k-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .note .k{ color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .save-indicator {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .save-indicator.saving { color: var(--orange); }
+    .save-indicator.saved { color: var(--green); }
+
     textarea{
       width: 100%;
       resize: vertical;
-      min-height: 56px;
-      max-height: 160px;
+      min-height: 60px;
+      max-height: 180px;
       background: transparent;
       border: 0;
       outline: none;
       color: var(--text);
-      font-weight: 700;
-      font-size: 13px;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 13.5px;
+      line-height: 1.5;
     }
 
-    .btn-row{ display:flex; gap: 10px; flex-wrap: wrap; }
+    .btn-row{ display: flex; gap: 10px; }
 
     .btn{
-      border-radius: 12px;
-      padding: 10px 12px;
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.03);
       color: var(--text);
-      font-weight: 900;
-      font-size: 13px;
-      cursor:pointer;
-      flex: 1;
-      min-width: 120px;
-    }
-    .btn:hover{ border-color: rgba(88,166,255,0.45); }
-
-    .btn-kill{ background: var(--danger-bg); border-color: var(--danger-border); }
-    .btn-activate{ background: var(--success-bg); border-color: var(--success-border); }
-    .btn-update{ background: var(--warn-bg); border-color: var(--warn-border); }
-
-    .inline-update{
-      margin-top: 10px;
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-
-    .inline-update input{
-      flex: 1;
-      min-width: 220px;
-      padding: 11px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.15);
-      color: var(--text);
-      outline: none;
+      font-family: inherit;
       font-weight: 700;
       font-size: 13px;
+      cursor: pointer;
+      flex: 1;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .inline-update input:focus{ border-color: rgba(88,166,255,0.65); box-shadow: 0 0 0 3px rgba(88,166,255,0.18); }
+    .btn:hover{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
 
-    .small-submit{
-      padding: 11px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--warn-border);
-      background: rgba(210,153,34,0.16);
+    .btn-kill{ background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.2); color: #fda4af; }
+    .btn-kill:hover{ background: rgba(244, 63, 94, 0.16); border-color: var(--red); box-shadow: 0 0 15px rgba(244,63,94,0.15); }
+    
+    .btn-activate{ background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .btn-activate:hover{ background: rgba(16, 185, 129, 0.16); border-color: var(--green); box-shadow: 0 0 15px rgba(16,185,129,0.15); }
+    
+    .btn-update{ background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); color: #fde047; }
+    .btn-update:hover{ background: rgba(245, 158, 11, 0.16); border-color: var(--orange); box-shadow: 0 0 15px rgba(245,158,11,0.15); }
+
+    /* Modals (Glassmorphic Popups) */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 8, 16, 0.7);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-backdrop.open .modal {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: 19px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-body label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+      background: rgba(0, 0, 0, 0.3);
       color: var(--text);
-      font-weight: 900;
-      cursor:pointer;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .modal-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
     }
 
-    .hint{ color: var(--muted); font-size: 12px; margin-top: 12px; }
+    .modal-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    .modal-btn {
+      padding: 10px 20px;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .modal-btn-cancel {
+      background: transparent;
+      border-color: var(--glass-border);
+      color: var(--muted);
+    }
+    .modal-btn-cancel:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Toast System */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--glass-border);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateX(120%);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-size: 14px;
+      font-weight: 600;
+      pointer-events: auto;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast-success {
+      border-color: var(--green);
+      color: #6ee7b7;
+    }
+    .toast-error {
+      border-color: var(--red);
+      color: #fda4af;
+    }
+    .toast-info {
+      border-color: var(--accent);
+      color: #93c5fd;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+    }
   </style>
 </head>
 <body>
   <div class="page">
+    
+    <!-- Top Header -->
     <div class="header">
       <div class="title-wrap">
         <div class="title">
-          <!-- dashboard icon -->
-          <span aria-hidden="true" style="display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:10px; background: rgba(88,166,255,0.14); border: 1px solid rgba(88,166,255,0.35);">▦</span>
+          <span class="icon">▦</span>
           <span>Remote Software Control</span>
         </div>
         <div class="sub">
-          Auto-refresh every 10 seconds · Last updated: <span id="lastUpdatedText">--</span>
+          Auto-refresh active · Last updated: <span id="lastUpdatedText">--</span>
         </div>
       </div>
       <a class="logout" href="/logout">Logout</a>
     </div>
 
+    <!-- Stats Bar -->
     <div class="stats">
       <div class="stat-card">
         <div class="stat-k">Total Softwares</div>
         <div class="stat-v" id="statTotal">0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-k" style="color: rgba(124,255,176,0.95);">Active</div>
-        <div class="stat-v" id="statActive" style="color:#7CFFB0;">0</div>
+      <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.15);">
+        <div class="stat-k" style="color: #6ee7b7;">Active</div>
+        <div class="stat-v" id="statActive" style="color: var(--green);">0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-k" style="color: rgba(255,180,181,0.95);">Killed</div>
-        <div class="stat-v" id="statKilled" style="color:#FFB4B5;">0</div>
+      <div class="stat-card" style="border-color: rgba(244, 63, 94, 0.15);">
+        <div class="stat-k" style="color: #fda4af;">Killed</div>
+        <div class="stat-v" id="statKilled" style="color: var(--red);">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-k">Last Activity</div>
@@ -286,37 +614,126 @@
       </div>
     </div>
 
+    <!-- Search / Filter / Sort Panel -->
+    <div class="control-bar">
+      <div class="search-input-wrap">
+        <input type="text" id="searchInput" placeholder="Search by machine name, ID, IP or OS..." />
+      </div>
+      
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="active">Active</button>
+        <button class="filter-tab" data-filter="killed">Killed</button>
+        <button class="filter-tab" data-filter="update_available">Update Pending</button>
+      </div>
+
+      <div class="sort-wrap">
+        <label for="sortSelect">Sort:</label>
+        <select class="sort-select" id="sortSelect">
+          <option value="recent">Last Seen (Recent)</option>
+          <option value="name">Machine Name</option>
+          <option value="id">Software ID</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Cards Grid -->
     <div id="grid" class="grid"></div>
-    <div class="hint">Note: Admin notes UI-only hai (backend me save nahi hota).</div>
   </div>
 
+  <!-- Kill Modal Dialog -->
+  <div class="modal-backdrop" id="killModal">
+    <div class="modal">
+      <div class="modal-title" style="color: var(--red);">
+        <span>☠️</span> Kill Software Process
+      </div>
+      <div class="modal-body">
+        <label for="killReasonInput">Reason / Remarks for termination:</label>
+        <input class="modal-input" type="text" id="killReasonInput" placeholder="e.g. License expired, unauthorized machine..." />
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('killModal')">Cancel</button>
+        <button class="modal-btn" style="background: var(--red); color: white;" id="confirmKillBtn">Confirm Kill</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Modal Dialog -->
+  <div class="modal-backdrop" id="updateModal">
+    <div class="modal">
+      <div class="modal-title" style="color: var(--orange);">
+        <span>🚀</span> Push Update Package
+      </div>
+      <div class="modal-body">
+        <label for="updateUrlInput">Update script URL (.zip / .py / .exe):</label>
+        <input class="modal-input" type="url" id="updateUrlInput" placeholder="https://example.com/update.py" />
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('updateModal')">Cancel</button>
+        <button class="modal-btn" style="background: var(--orange); color: var(--bg);" id="confirmUpdateBtn">Push Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
   <script>
-    // Secret key for admin protected API calls
-    const ADMIN_SECRET = "MY_SECRET_KEY_123";
-
-    // Backend initial load (Jinja2) - optional; JS live refresh will overwrite
+    // State
     // eslint-disable-next-line
-    const initialSoftwares = {{ softwares | tojson }};
+    const initialSoftwares = {{ softwares | tojson | safe }};
+    let softwares = initialSoftwares || {};
+    const notes = {};
 
-    softwares = initialSoftwares || {};
+    // Modal target mapping
+    let activeActionSoftwareId = null;
 
-    const notes = {}; // software_id -> note text (UI only)
+    // Filter / Sort States
+    let currentFilter = 'all';
+    let currentSearchQuery = '';
+    let currentSort = 'recent';
+
+    // Populate local notes map
+    for(const s of Object.values(softwares)){
+      notes[s.software_id] = s.notes || '';
+    }
+
+    // Toast Alert Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      
+      toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Auto-remove toast
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+      }, 3500);
+    }
 
     function safeStr(v){ return (v === undefined || v === null || v === '') ? '—' : String(v); }
 
-    function statusBadge(software){
-      const st = software.status;
-      if(st === 'active') return '<span class="badge badge-active">ACTIVE</span>';
-      if(st === 'killed') return '<span class="badge badge-killed">KILLED</span>';
-      if(st === 'update_available') return '<span class="badge badge-update">UPDATE AVAILABLE</span>';
-      return '<span class="badge badge-update">' + safeStr(st).toUpperCase() + '</span>';
+    function statusBadge(status){
+      if(status === 'active') return '<span class="badge badge-active">ACTIVE</span>';
+      if(status === 'killed') return '<span class="badge badge-killed">KILLED</span>';
+      if(status === 'update_available') return '<span class="badge badge-update">UPDATE PENDING</span>';
+      return '<span class="badge badge-update">' + safeStr(status).toUpperCase() + '</span>';
     }
 
     function minutesAgo(ts){
       if(!ts) return '—';
       const ms = (Date.now() - (ts*1000));
       const mins = Math.floor(ms / 60000);
-      if(mins < 1) return '0 min ago';
+      if(mins < 1) return 'Just now';
       return mins + ' min ago';
     }
 
@@ -326,11 +743,59 @@
       return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
     }
 
+    // Modal Control functions
+    function openModal(modalId, softwareId) {
+      activeActionSoftwareId = softwareId;
+      const backdrop = document.getElementById(modalId);
+      backdrop.classList.add('open');
+      
+      // Clear inputs
+      if (modalId === 'killModal') {
+        document.getElementById('killReasonInput').value = '';
+        setTimeout(() => document.getElementById('killReasonInput').focus(), 100);
+      } else if (modalId === 'updateModal') {
+        document.getElementById('updateUrlInput').value = '';
+        setTimeout(() => document.getElementById('updateUrlInput').focus(), 100);
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('open');
+      activeActionSoftwareId = null;
+    }
+
+    // Modal Submission Handlers
+    document.getElementById('confirmKillBtn').addEventListener('click', async () => {
+      const softwareId = activeActionSoftwareId;
+      const reason = document.getElementById('killReasonInput').value.trim() || 'Killed from dashboard';
+      closeModal('killModal');
+      
+      try {
+        await postJSON('/api/admin/kill', { software_id: softwareId, reason });
+        showToast(`Process ${softwareId} marked as killed`, 'success');
+        await refresh();
+      } catch (err) {
+        showToast(err.message || 'Failed to kill process', 'error');
+      }
+    });
+
+    document.getElementById('confirmUpdateBtn').addEventListener('click', async () => {
+      const softwareId = activeActionSoftwareId;
+      const updateUrl = document.getElementById('updateUrlInput').value.trim();
+      if(!updateUrl){ showToast('Update URL is required', 'error'); return; }
+      closeModal('updateModal');
+      
+      try {
+        await postJSON('/api/admin/update', { software_id: softwareId, update_url: updateUrl });
+        showToast('Update package URL pushed successfully', 'success');
+        await refresh();
+      } catch (err) {
+        showToast(err.message || 'Failed to push update', 'error');
+      }
+    });
+
     async function apiList(){
-      const res = await fetch('/api/admin/list', {
-        method: 'GET',
-        headers: { 'X-Admin-Secret': ADMIN_SECRET }
-      });
+      const res = await fetch('/api/admin/list', { method: 'GET' });
       if(!res.ok){
         const err = await res.json().catch(()=>({}));
         throw new Error(err.error || 'Failed to fetch list');
@@ -378,28 +843,63 @@
       document.getElementById('statKilled').textContent = stats.killed;
       document.getElementById('statLastActivity').textContent = stats.lastActivity;
 
-      // cards
+      // Filter and Sort softwares list
+      let list = Object.values(softwares || {});
+
+      // Filter by Status Tab
+      if (currentFilter !== 'all') {
+        list = list.filter(s => s.status === currentFilter);
+      }
+
+      // Filter by Search Query
+      if (currentSearchQuery) {
+        const q = currentSearchQuery.toLowerCase();
+        list = list.filter(s => 
+          (s.machine_name || '').toLowerCase().includes(q) ||
+          (s.software_id || '').toLowerCase().includes(q) ||
+          (s.ip_address || '').toLowerCase().includes(q) ||
+          (s.os_name || '').toLowerCase().includes(q)
+        );
+      }
+
+      // Sort
+      list.sort((a, b) => {
+        if (currentSort === 'name') {
+          return (a.machine_name || '').localeCompare(b.machine_name || '');
+        } else if (currentSort === 'id') {
+          return (a.software_id || '').localeCompare(b.software_id || '');
+        } else {
+          return (b.last_seen || 0) - (a.last_seen || 0);
+        }
+      });
+
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
-      for(const software of Object.values(softwares || {})){
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="no-results">No softwares match the criteria.</div>';
+        document.getElementById('lastUpdatedText').textContent = timeNowStr();
+        return;
+      }
+
+      for(const software of list){
         const softwareId = safeStr(software.software_id);
         const machineName = safeStr(software.machine_name);
         const version = safeStr(software.version);
-        // UI requirements: OS name, IP address
         const osName = safeStr(software.os_name);
         const ipAddress = safeStr(software.ip_address);
         const lastSeenFull = software.last_seen ? new Date(software.last_seen*1000).toLocaleString() : '—';
+        const notesValue = notes[softwareId] || '';
 
         const card = document.createElement('div');
-        card.className = 'soft-card';
+        card.className = `soft-card card-${software.status}`;
         card.innerHTML = `
           <div class="soft-top">
             <div>
               <div class="soft-name">${machineName}</div>
               <div class="sub" style="margin-top:6px;">ID: ${softwareId}</div>
             </div>
-            ${statusBadge(software)}
+            ${statusBadge(software.status)}
           </div>
 
           <div class="info-grid">
@@ -411,63 +911,54 @@
           </div>
 
           <div class="note">
-            <div class="k">Notes / Remark (UI only)</div>
-            <textarea placeholder="Admin note likho..." data-software-id="${softwareId}">${notes[softwareId] || ''}</textarea>
+            <div class="k-row">
+              <div class="k">Notes / Remarks</div>
+              <div class="save-indicator" id="save-${softwareId}">Saved</div>
+            </div>
+            <textarea placeholder="Write administrative remark..." data-software-id="${softwareId}">${notesValue}</textarea>
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-kill" type="button" data-action="kill">Kill</button>
-            <button class="btn btn-activate" type="button" data-action="activate">Activate</button>
-            <button class="btn btn-update" type="button" data-action="update">Push Update</button>
-          </div>
-
-          <div class="inline-update" style="display:none;" data-update-row="${softwareId}">
-            <input type="url" placeholder="https://.../update.zip" data-update-input="${softwareId}" />
-            <button class="small-submit" type="button" data-update-submit="${softwareId}">Submit</button>
-            <button class="small-submit" type="button" style="border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03);" data-update-cancel="${softwareId}">Cancel</button>
+            <button class="btn btn-kill" type="button" onclick="openModal('killModal', '${softwareId}')">Kill</button>
+            <button class="btn btn-activate" type="button" id="act-${softwareId}">Activate</button>
+            <button class="btn btn-update" type="button" onclick="openModal('updateModal', '${softwareId}')">Push Update</button>
           </div>
         `;
 
-        // Wire note textarea
+        // Wire notes textarea autosave
         const ta = card.querySelector('textarea[data-software-id="'+softwareId+'"]');
-        ta.addEventListener('input', (e)=>{
-          notes[softwareId] = e.target.value;
+        const indicator = card.querySelector(`#save-${softwareId}`);
+        let debounceTimer = null;
+        
+        ta.addEventListener('input', (e) => {
+          indicator.textContent = 'Saving...';
+          indicator.className = 'save-indicator saving';
+          
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(async () => {
+            const newNote = e.target.value;
+            notes[softwareId] = newNote;
+            try {
+              await postJSON('/api/admin/save_notes', { software_id: softwareId, notes: newNote });
+              indicator.textContent = 'Saved';
+              indicator.className = 'save-indicator saved';
+            } catch(err) {
+              indicator.textContent = 'Error';
+              indicator.className = 'save-indicator';
+              console.error(err);
+            }
+          }, 800);
         });
 
-        // Wire buttons
-        card.querySelector('button[data-action="kill"]').addEventListener('click', async ()=>{
-          const reason = 'Killed from dashboard';
-          await postJSON('/api/admin/kill', { secret: ADMIN_SECRET, software_id: softwareId, reason });
-          await refresh();
-        });
-
-        card.querySelector('button[data-action="activate"]').addEventListener('click', async ()=>{
-          await postJSON('/api/admin/activate', { secret: ADMIN_SECRET, software_id: softwareId });
-          await refresh();
-        });
-
-        const updateRow = card.querySelector('div[data-update-row="'+softwareId+'"]');
-        const updateInput = card.querySelector('input[data-update-input="'+softwareId+'"]');
-        const showUpdate = ()=>{
-          updateRow.style.display = 'flex';
-          setTimeout(()=>updateInput.focus(), 0);
-        };
-
-        card.querySelector('button[data-action="update"]').addEventListener('click', showUpdate);
-
-        // submit/cancel
-        card.querySelector('button[data-update-submit="'+softwareId+'"]').addEventListener('click', async ()=>{
-          const updateUrl = (updateInput.value || '').trim();
-          if(!updateUrl){ alert('Update URL required'); return; }
-          await postJSON('/api/admin/update', { secret: ADMIN_SECRET, software_id: softwareId, update_url: updateUrl });
-          updateRow.style.display = 'none';
-          updateInput.value = '';
-          await refresh();
-        });
-
-        card.querySelector('button[data-update-cancel="'+softwareId+'"]').addEventListener('click', ()=>{
-          updateRow.style.display = 'none';
-          updateInput.value = '';
+        // Wire activate button
+        card.querySelector(`#act-${softwareId}`).addEventListener('click', async () => {
+          try {
+            await postJSON('/api/admin/activate', { software_id: softwareId });
+            showToast(`Process ${softwareId} status updated to Active`, 'success');
+            await refresh();
+          } catch(err) {
+            showToast(err.message || 'Activation failed', 'error');
+          }
         });
 
         grid.appendChild(card);
@@ -478,22 +969,53 @@
     }
 
     async function refresh(){
-      const payload = await apiList();
-      // payload: {softwares:{...}}
-      softwares = payload.softwares || {};
-      render();
+      try {
+        const payload = await apiList();
+        softwares = payload.softwares || {};
+        // Sync local notes
+        for(const s of Object.values(softwares)){
+          notes[s.software_id] = s.notes || '';
+        }
+        render();
+      } catch (e) {
+        console.error(e);
+        document.getElementById('lastUpdatedText').textContent = 'Fetch failed';
+      }
     }
 
-    // Initial paint using passed-in dict, then live refresh loop
-    render();
-    refresh().catch((e)=>{
-      console.error(e);
-      document.getElementById('lastUpdatedText').textContent = 'Fetch failed';
+    // Wire Control Panel Listeners
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      currentSearchQuery = e.target.value;
+      render();
     });
-    setInterval(()=>{
-      refresh().catch((e)=>console.error(e));
-    }, 10000);
+
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        render();
+      });
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      render();
+    });
+
+    // Close modals on clicking backdrop
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-backdrop')) {
+        e.target.classList.remove('open');
+      }
+    });
+
+    // Initial paint and poll
+    render();
+    refresh();
+    
+    // Auto-refresh loop (every 10 seconds)
+    setInterval(refresh, 10000);
   </script>
 </body>
 </html>
-

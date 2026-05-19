@@ -1,3 +1,5 @@
+import os
+import sqlite3
 import time
 from functools import wraps
 
@@ -13,25 +15,112 @@ from flask import (
 
 app = Flask(__name__)
 
-# ======= Config / Credentials (as requested) =======
-pythonADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "vipin@123"
-ADMIN_SECRET = "MY_SECRET_KEY_123"
+# ======= Config / Credentials =======
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "vipin@123")
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "MY_SECRET_KEY_123")
 
 # Flask session secret
-app.secret_key = "flask_session_secret_xyz"
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "flask_session_secret_xyz")
 
-# ======= In-memory storage (no DB / no files) =======
-# softwares[software_id] = {
-#   "software_id": str,
-#   "machine_name": str,
-#   "version": str,
-#   "last_seen": float,
-#   "status": "active"|"killed"|"update_available",
-#   "kill_reason": str|None,
-#   "update_url": str|None,
-# }
-softwares = {}
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+
+
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS softwares (
+                software_id TEXT PRIMARY KEY,
+                machine_name TEXT,
+                version TEXT,
+                os_name TEXT,
+                ip_address TEXT,
+                last_seen REAL,
+                status TEXT,
+                kill_reason TEXT,
+                update_url TEXT,
+                notes TEXT
+            )
+        """)
+        conn.commit()
+
+
+def get_all_softwares():
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM softwares")
+        rows = cursor.fetchall()
+        return {row["software_id"]: dict(row) for row in rows}
+
+
+def get_software(software_id):
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM softwares WHERE software_id = ?", (software_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def save_software_heartbeat(software_id, machine_name, version, os_name, ip_address):
+    init_db()
+    now = time.time()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT status, kill_reason, update_url FROM softwares WHERE software_id = ?", (software_id,))
+        row = cursor.fetchone()
+        if row is None:
+            cursor.execute("""
+                INSERT INTO softwares (software_id, machine_name, version, os_name, ip_address, last_seen, status, kill_reason, update_url, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (software_id, machine_name, version, os_name, ip_address, now, "active", None, None, ""))
+        else:
+            cursor.execute("""
+                UPDATE softwares
+                SET machine_name = COALESCE(?, machine_name),
+                    version = COALESCE(?, version),
+                    os_name = COALESCE(?, os_name),
+                    ip_address = COALESCE(?, ip_address),
+                    last_seen = ?
+                WHERE software_id = ?
+            """, (machine_name or None, version or None, os_name or None, ip_address or None, now, software_id))
+        conn.commit()
+
+
+def set_software_status(software_id, status, kill_reason=None, update_url=None):
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM softwares WHERE software_id = ?", (software_id,))
+        exists = cursor.fetchone()
+        if not exists:
+            cursor.execute("""
+                INSERT INTO softwares (software_id, machine_name, version, os_name, ip_address, last_seen, status, kill_reason, update_url, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (software_id, None, None, None, None, time.time(), status, kill_reason, update_url, ""))
+        else:
+            if status == "killed":
+                cursor.execute("""
+                    UPDATE softwares
+                    SET status = ?, kill_reason = ?
+                    WHERE software_id = ?
+                """, (status, kill_reason, software_id))
+            elif status == "active":
+                cursor.execute("""
+                    UPDATE softwares
+                    SET status = ?, kill_reason = NULL
+                    WHERE software_id = ?
+                """, (status, software_id))
+            elif status == "update_available":
+                cursor.execute("""
+                    UPDATE softwares
+                    SET status = ?, update_url = ?
+                    WHERE software_id = ?
+                """, (status, update_url, software_id))
+        conn.commit()
 
 
 def login_required(f):
@@ -54,7 +143,7 @@ def do_login():
     username = request.form.get("username", "")
     password = request.form.get("password", "")
 
-    if username == pythonADMIN_USERNAME and password == ADMIN_PASSWORD:
+    if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         session["logged_in"] = True
         session["username"] = username
         return redirect(url_for("dashboard"))
@@ -74,20 +163,23 @@ def logout():
 @app.route("/dashboard", methods=["GET"])
 @login_required
 def dashboard():
-    # UI will call API periodically; this page can render initial state.
-    return render_template("dashboard.html", now=int(time.time()), softwares=softwares)
+    all_softwares = get_all_softwares()
+    serialized = {sid: _serialize_software(sid, obj) for sid, obj in all_softwares.items()}
+    return render_template("dashboard.html", now=int(time.time()), softwares=serialized)
 
 
 def _serialize_software(software_id, obj):
-    status = obj.get("status", "active")
     return {
         "software_id": software_id,
         "machine_name": obj.get("machine_name"),
         "version": obj.get("version"),
+        "os_name": obj.get("os_name"),
+        "ip_address": obj.get("ip_address"),
         "last_seen": obj.get("last_seen"),
-        "status": status,
+        "status": obj.get("status", "active"),
         "kill_reason": obj.get("kill_reason"),
         "update_url": obj.get("update_url"),
+        "notes": obj.get("notes", ""),
     }
 
 
@@ -98,32 +190,16 @@ def api_heartbeat():
     software_id = str(data.get("software_id", "")).strip()
     version = str(data.get("version", "")).strip()
     machine_name = str(data.get("machine_name", "")).strip()
+    os_name = str(data.get("os_name", "")).strip()
+    ip_address = str(data.get("ip_address", "")).strip()
 
     if not software_id:
         return jsonify({"error": "software_id is required"}), 400
 
-    now = time.time()
+    save_software_heartbeat(software_id, machine_name, version, os_name, ip_address)
 
-    if software_id not in softwares:
-        softwares[software_id] = {
-            "software_id": software_id,
-            "machine_name": machine_name,
-            "version": version,
-            "last_seen": now,
-            "status": "active",
-            "kill_reason": None,
-            "update_url": None,
-        }
-    else:
-        softwares[software_id]["machine_name"] = machine_name or softwares[software_id].get(
-            "machine_name"
-        )
-        softwares[software_id]["version"] = version or softwares[software_id].get("version")
-        softwares[software_id]["last_seen"] = now
+    obj = get_software(software_id) or {}
 
-    obj = softwares[software_id]
-
-    # Response should include: status, kill_reason, update_url
     resp = {
         "software_id": software_id,
         "status": obj.get("status", "active"),
@@ -134,113 +210,64 @@ def api_heartbeat():
     return jsonify(resp), 200
 
 
-def _verify_admin_secret(req):
-    secret = req.headers.get("X-Admin-Secret") or req.headers.get("x-admin-secret")
-    # Some endpoints pass it in JSON body as "secret".
-    if secret:
-        return secret == ADMIN_SECRET
-    return False
-
-
 @app.route("/api/admin/kill", methods=["POST"])
 def api_admin_kill():
-    data = request.get_json(force=True, silent=True) or {}
-    secret = str(data.get("secret", "")).strip()
+    if not session.get("logged_in"):
+        data = request.get_json(force=True, silent=True) or {}
+        secret = str(data.get("secret", "")).strip()
+        if secret != ADMIN_SECRET:
+            return jsonify({"error": "Unauthorized"}), 401
+    else:
+        data = request.get_json(force=True, silent=True) or {}
+
     software_id = str(data.get("software_id", "")).strip()
     reason = str(data.get("reason", "")).strip()
 
-    if secret != ADMIN_SECRET:
-        return jsonify({"error": "Unauthorized"}), 401
     if not software_id:
         return jsonify({"error": "software_id is required"}), 400
 
-    if software_id in softwares:
-        softwares[software_id].update(
-            {
-                "status": "killed",
-                "kill_reason": reason or "Killed by admin",
-                "update_url": softwares[software_id].get("update_url"),
-            }
-        )
-    else:
-        softwares[software_id] = {
-            "software_id": software_id,
-            "machine_name": None,
-            "version": None,
-            "last_seen": time.time(),
-            "status": "killed",
-            "kill_reason": reason or "Killed by admin",
-            "update_url": None,
-        }
-
+    set_software_status(software_id, "killed", kill_reason=reason or "Killed by admin")
     return jsonify({"ok": True, "software_id": software_id, "status": "killed"}), 200
 
 
 @app.route("/api/admin/activate", methods=["POST"])
 def api_admin_activate():
-    data = request.get_json(force=True, silent=True) or {}
-    secret = str(data.get("secret", "")).strip()
+    if not session.get("logged_in"):
+        data = request.get_json(force=True, silent=True) or {}
+        secret = str(data.get("secret", "")).strip()
+        if secret != ADMIN_SECRET:
+            return jsonify({"error": "Unauthorized"}), 401
+    else:
+        data = request.get_json(force=True, silent=True) or {}
+
     software_id = str(data.get("software_id", "")).strip()
 
-    if secret != ADMIN_SECRET:
-        return jsonify({"error": "Unauthorized"}), 401
     if not software_id:
         return jsonify({"error": "software_id is required"}), 400
 
-    if software_id in softwares:
-        softwares[software_id].update(
-            {
-                "status": "active",
-                "kill_reason": None,
-            }
-        )
-    else:
-        softwares[software_id] = {
-            "software_id": software_id,
-            "machine_name": None,
-            "version": None,
-            "last_seen": time.time(),
-            "status": "active",
-            "kill_reason": None,
-            "update_url": None,
-        }
-
+    set_software_status(software_id, "active")
     return jsonify({"ok": True, "software_id": software_id, "status": "active"}), 200
 
 
 @app.route("/api/admin/update", methods=["POST"])
 def api_admin_update():
-    data = request.get_json(force=True, silent=True) or {}
-    secret = str(data.get("secret", "")).strip()
+    if not session.get("logged_in"):
+        data = request.get_json(force=True, silent=True) or {}
+        secret = str(data.get("secret", "")).strip()
+        if secret != ADMIN_SECRET:
+            return jsonify({"error": "Unauthorized"}), 401
+    else:
+        data = request.get_json(force=True, silent=True) or {}
+
     software_id = str(data.get("software_id", "")).strip()
     update_url = str(data.get("update_url", "")).strip()
 
-    if secret != ADMIN_SECRET:
-        return jsonify({"error": "Unauthorized"}), 401
     if not software_id:
         return jsonify({"error": "software_id is required"}), 400
     if not update_url:
         return jsonify({"error": "update_url is required"}), 400
 
-    if software_id in softwares:
-        softwares[software_id].update(
-            {
-                "status": "update_available",
-                "update_url": update_url,
-                # keep kill_reason as-is
-            }
-        )
-    else:
-        softwares[software_id] = {
-            "software_id": software_id,
-            "machine_name": None,
-            "version": None,
-            "last_seen": time.time(),
-            "status": "update_available",
-            "kill_reason": None,
-            "update_url": update_url,
-        }
-
+    set_software_status(software_id, "update_available", update_url=update_url)
     return (
         jsonify(
             {
@@ -256,13 +283,36 @@ def api_admin_update():
 
 @app.route("/api/admin/list", methods=["GET"])
 def api_admin_list():
-    # Requirement: header X-Admin-Secret verify
-    if request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
+    if not session.get("logged_in"):
+        secret = request.headers.get("X-Admin-Secret") or request.headers.get("x-admin-secret")
+        if secret != ADMIN_SECRET:
+            return jsonify({"error": "Unauthorized"}), 401
+
+    all_softwares = get_all_softwares()
+    serialized = {sid: _serialize_software(sid, obj) for sid, obj in all_softwares.items()}
+    return jsonify({"softwares": serialized}), 200
+
+
+@app.route("/api/admin/save_notes", methods=["POST"])
+def api_admin_save_notes():
+    if not session.get("logged_in"):
         return jsonify({"error": "Unauthorized"}), 401
 
-    return jsonify({"softwares": {sid: _serialize_software(sid, obj) for sid, obj in softwares.items()}}), 200
+    data = request.get_json(force=True, silent=True) or {}
+    software_id = str(data.get("software_id", "")).strip()
+    notes = str(data.get("notes", ""))
+
+    if not software_id:
+        return jsonify({"error": "software_id is required"}), 400
+
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("UPDATE softwares SET notes = ? WHERE software_id = ?", (notes, software_id))
+        conn.commit()
+
+    return jsonify({"ok": True}), 200
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)
-
