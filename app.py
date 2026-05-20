@@ -39,7 +39,9 @@ def init_db():
                 status TEXT,
                 kill_reason TEXT,
                 update_url TEXT,
-                notes TEXT
+                notes TEXT,
+                pause_until REAL,
+                pause_reason TEXT
             )
         """)
         conn.commit()
@@ -98,8 +100,8 @@ def set_software_status(software_id, status, kill_reason=None, update_url=None):
         exists = cursor.fetchone()
         if not exists:
             cursor.execute("""
-                INSERT INTO softwares (software_id, machine_name, version, os_name, ip_address, last_seen, status, kill_reason, update_url, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO softwares (software_id, machine_name, version, os_name, ip_address, last_seen, status, kill_reason, update_url, notes, pause_until, pause_reason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
             """, (software_id, None, None, None, None, time.time(), status, kill_reason, update_url, ""))
         else:
             if status == "killed":
@@ -120,6 +122,30 @@ def set_software_status(software_id, status, kill_reason=None, update_url=None):
                     SET status = ?, update_url = ?
                     WHERE software_id = ?
                 """, (status, update_url, software_id))
+        conn.commit()
+
+
+def set_software_pause(software_id, pause_minutes, pause_reason=""):
+    """Set software to pause for specified minutes. 0 means immediate pause."""
+    init_db()
+    now = time.time()
+    pause_until = now + (pause_minutes * 60) if pause_minutes > 0 else now
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM softwares WHERE software_id = ?", (software_id,))
+        exists = cursor.fetchone()
+        if not exists:
+            cursor.execute("""
+                INSERT INTO softwares (software_id, machine_name, version, os_name, ip_address, last_seen, status, kill_reason, update_url, notes, pause_until, pause_reason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (software_id, None, None, None, None, now, "paused", None, None, "", pause_until, pause_reason))
+        else:
+            cursor.execute("""
+                UPDATE softwares
+                SET status = ?, pause_until = ?, pause_reason = ?, kill_reason = NULL
+                WHERE software_id = ?
+            """, ("paused", pause_until, pause_reason, software_id))
         conn.commit()
 
 
@@ -180,6 +206,8 @@ def _serialize_software(software_id, obj):
         "kill_reason": obj.get("kill_reason"),
         "update_url": obj.get("update_url"),
         "notes": obj.get("notes", ""),
+        "pause_until": obj.get("pause_until"),
+        "pause_reason": obj.get("pause_reason", ""),
     }
 
 
@@ -205,6 +233,8 @@ def api_heartbeat():
         "status": obj.get("status", "active"),
         "kill_reason": obj.get("kill_reason"),
         "update_url": obj.get("update_url"),
+        "pause_until": obj.get("pause_until"),
+        "pause_reason": obj.get("pause_reason"),
     }
 
     return jsonify(resp), 200
@@ -247,6 +277,39 @@ def api_admin_activate():
 
     set_software_status(software_id, "active")
     return jsonify({"ok": True, "software_id": software_id, "status": "active"}), 200
+
+
+@app.route("/api/admin/pause", methods=["POST"])
+def api_admin_pause():
+    """Pause software for specified minutes with optional auto-restart."""
+    if not session.get("logged_in"):
+        data = request.get_json(force=True, silent=True) or {}
+        secret = str(data.get("secret", "")).strip()
+        if secret != ADMIN_SECRET:
+            return jsonify({"error": "Unauthorized"}), 401
+    else:
+        data = request.get_json(force=True, silent=True) or {}
+
+    software_id = str(data.get("software_id", "")).strip()
+    pause_minutes = int(data.get("pause_minutes", 0) or 0)  # 0 = immediate close
+    reason = str(data.get("reason", "Manual pause")).strip()
+
+    if not software_id:
+        return jsonify({"error": "software_id is required"}), 400
+    
+    if pause_minutes < 0:
+        pause_minutes = 0
+
+    set_software_pause(software_id, pause_minutes, reason)
+    
+    pause_until = time.time() + (pause_minutes * 60) if pause_minutes > 0 else time.time()
+    return jsonify({
+        "ok": True,
+        "software_id": software_id,
+        "status": "paused",
+        "pause_minutes": pause_minutes,
+        "pause_until": pause_until,
+    }), 200
 
 
 @app.route("/api/admin/update", methods=["POST"])

@@ -286,6 +286,7 @@
     }
     .soft-card.card-active::before { background: var(--green); }
     .soft-card.card-killed::before { background: var(--red); }
+    .soft-card.card-paused::before { background: #22c5e6; }
     .soft-card.card-update_available::before { background: var(--orange); }
 
     .soft-card:hover{
@@ -324,6 +325,7 @@
 
     .badge-active{ background: var(--green-glow); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
     .badge-killed{ background: var(--red-glow); border-color: rgba(244,63,94,0.3); color: #fda4af; }
+    .badge-paused{ background: rgba(34, 197, 230, 0.15); border-color: rgba(34, 197, 230, 0.3); color: #67e8f9; }
     .badge-update{ background: var(--orange-glow); border-color: rgba(245,158,11,0.3); color: #fde047; }
 
     .info-grid{
@@ -418,6 +420,9 @@
     
     .btn-update{ background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); color: #fde047; }
     .btn-update:hover{ background: rgba(245, 158, 11, 0.16); border-color: var(--orange); box-shadow: 0 0 15px rgba(245,158,11,0.15); }
+
+    .btn-pause{ background: rgba(34, 197, 230, 0.08); border-color: rgba(34, 197, 230, 0.2); color: #67e8f9; }
+    .btn-pause:hover{ background: rgba(34, 197, 230, 0.16); border-color: #22c5e6; box-shadow: 0 0 15px rgba(34,197,230,0.15); }
 
     /* Modals (Glassmorphic Popups) */
     .modal-backdrop {
@@ -608,6 +613,10 @@
         <div class="stat-k" style="color: #fda4af;">Killed</div>
         <div class="stat-v" id="statKilled" style="color: var(--red);">0</div>
       </div>
+      <div class="stat-card" style="border-color: rgba(34, 197, 230, 0.15);">
+        <div class="stat-k" style="color: #67e8f9;">Paused</div>
+        <div class="stat-v" id="statPaused" style="color: #22c5e6;">0</div>
+      </div>
       <div class="stat-card">
         <div class="stat-k">Last Activity</div>
         <div class="stat-v" id="statLastActivity">--</div>
@@ -623,6 +632,7 @@
       <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">All</button>
         <button class="filter-tab" data-filter="active">Active</button>
+        <button class="filter-tab" data-filter="paused">Paused</button>
         <button class="filter-tab" data-filter="killed">Killed</button>
         <button class="filter-tab" data-filter="update_available">Update Pending</button>
       </div>
@@ -671,6 +681,32 @@
       <div class="modal-btns">
         <button class="modal-btn modal-btn-cancel" onclick="closeModal('updateModal')">Cancel</button>
         <button class="modal-btn" style="background: var(--orange); color: var(--bg);" id="confirmUpdateBtn">Push Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Modal Dialog -->
+  <div class="modal-backdrop" id="pauseModal">
+    <div class="modal">
+      <div class="modal-title" style="color: #22c5e6;">
+        <span>⏸️</span> Pause Software Process
+      </div>
+      <div class="modal-body">
+        <label for="pauseMinutesSelect">Pause Duration:</label>
+        <select class="modal-input" id="pauseMinutesSelect">
+          <option value="0">Immediate Close (No Restart)</option>
+          <option value="5">5 Minutes + Auto-Restart</option>
+          <option value="10">10 Minutes + Auto-Restart</option>
+          <option value="50">50 Minutes + Auto-Restart</option>
+          <option value="custom">Custom Minutes</option>
+        </select>
+        <input class="modal-input" type="number" id="pauseCustomMinutes" placeholder="Enter custom minutes" style="display:none; margin-top:12px;" min="1" max="10080" />
+        <label for="pauseReasonInput" style="margin-top:12px;">Reason (Optional):</label>
+        <input class="modal-input" type="text" id="pauseReasonInput" placeholder="e.g. Scheduled maintenance, patch application..." />
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('pauseModal')">Cancel</button>
+        <button class="modal-btn" style="background: #22c5e6; color: var(--bg);" id="confirmPauseBtn">Pause Software</button>
       </div>
     </div>
   </div>
@@ -725,6 +761,7 @@
     function statusBadge(status){
       if(status === 'active') return '<span class="badge badge-active">ACTIVE</span>';
       if(status === 'killed') return '<span class="badge badge-killed">KILLED</span>';
+      if(status === 'paused') return '<span class="badge badge-paused">PAUSED</span>';
       if(status === 'update_available') return '<span class="badge badge-update">UPDATE PENDING</span>';
       return '<span class="badge badge-update">' + safeStr(status).toUpperCase() + '</span>';
     }
@@ -756,6 +793,11 @@
       } else if (modalId === 'updateModal') {
         document.getElementById('updateUrlInput').value = '';
         setTimeout(() => document.getElementById('updateUrlInput').focus(), 100);
+      } else if (modalId === 'pauseModal') {
+        document.getElementById('pauseMinutesSelect').value = '5';
+        document.getElementById('pauseCustomMinutes').style.display = 'none';
+        document.getElementById('pauseReasonInput').value = '';
+        setTimeout(() => document.getElementById('pauseMinutesSelect').focus(), 100);
       }
     }
 
@@ -794,6 +836,46 @@
       }
     });
 
+    // Pause select handler - show/hide custom input
+    document.getElementById('pauseMinutesSelect').addEventListener('change', (e) => {
+      const customInput = document.getElementById('pauseCustomMinutes');
+      if (e.target.value === 'custom') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+      }
+    });
+
+    document.getElementById('confirmPauseBtn').addEventListener('click', async () => {
+      const softwareId = activeActionSoftwareId;
+      let pauseMinutes = document.getElementById('pauseMinutesSelect').value;
+      
+      if (pauseMinutes === 'custom') {
+        pauseMinutes = parseInt(document.getElementById('pauseCustomMinutes').value, 10);
+        if (isNaN(pauseMinutes) || pauseMinutes < 0) {
+          showToast('Please enter a valid pause duration', 'error');
+          return;
+        }
+      } else {
+        pauseMinutes = parseInt(pauseMinutes, 10);
+      }
+      
+      const reason = document.getElementById('pauseReasonInput').value.trim() || 'Paused from dashboard';
+      closeModal('pauseModal');
+      
+      try {
+        await postJSON('/api/admin/pause', { software_id: softwareId, pause_minutes: pauseMinutes, reason });
+        const msg = pauseMinutes === 0 
+          ? `${softwareId} will close immediately`
+          : `${softwareId} will pause and restart after ${pauseMinutes} minute(s)`;
+        showToast(msg, 'success');
+        await refresh();
+      } catch (err) {
+        showToast(err.message || 'Failed to pause process', 'error');
+      }
+    });
+
     async function apiList(){
       const res = await fetch('/api/admin/list', { method: 'GET' });
       if(!res.ok){
@@ -820,6 +902,7 @@
       const values = Object.values(softwaresDict || {});
       let total = values.length;
       let active = values.filter(s => s.status === 'active').length;
+      let paused = values.filter(s => s.status === 'paused').length;
       let killed = values.filter(s => s.status === 'killed').length;
       let lastTs = null;
       for(const s of values){
@@ -830,6 +913,7 @@
       return {
         total,
         active,
+        paused,
         killed,
         lastActivity: lastTs ? minutesAgo(lastTs) : '--'
       };
@@ -840,7 +924,9 @@
       const stats = computeStats(softwares);
       document.getElementById('statTotal').textContent = stats.total;
       document.getElementById('statActive').textContent = stats.active;
+      document.getElementById('statPaused').textContent = stats.paused;
       document.getElementById('statKilled').textContent = stats.killed;
+      document.getElementById('statLastActivity').textContent = stats.lastActivity;
       document.getElementById('statLastActivity').textContent = stats.lastActivity;
 
       // Filter and Sort softwares list
@@ -919,6 +1005,7 @@
           </div>
 
           <div class="btn-row">
+            <button class="btn btn-pause" type="button" onclick="openModal('pauseModal', '${softwareId}')">Pause</button>
             <button class="btn btn-kill" type="button" onclick="openModal('killModal', '${softwareId}')">Kill</button>
             <button class="btn btn-activate" type="button" id="act-${softwareId}">Activate</button>
             <button class="btn btn-update" type="button" onclick="openModal('updateModal', '${softwareId}')">Push Update</button>
