@@ -286,7 +286,6 @@
     }
     .soft-card.card-active::before { background: var(--green); }
     .soft-card.card-killed::before { background: var(--red); }
-    .soft-card.card-paused::before { background: #22c5e6; }
     .soft-card.card-update_available::before { background: var(--orange); }
 
     .soft-card:hover{
@@ -325,7 +324,6 @@
 
     .badge-active{ background: var(--green-glow); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
     .badge-killed{ background: var(--red-glow); border-color: rgba(244,63,94,0.3); color: #fda4af; }
-    .badge-paused{ background: rgba(34, 197, 230, 0.15); border-color: rgba(34, 197, 230, 0.3); color: #67e8f9; }
     .badge-update{ background: var(--orange-glow); border-color: rgba(245,158,11,0.3); color: #fde047; }
 
     .info-grid{
@@ -420,9 +418,6 @@
     
     .btn-update{ background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); color: #fde047; }
     .btn-update:hover{ background: rgba(245, 158, 11, 0.16); border-color: var(--orange); box-shadow: 0 0 15px rgba(245,158,11,0.15); }
-
-    .btn-pause{ background: rgba(34, 197, 230, 0.08); border-color: rgba(34, 197, 230, 0.2); color: #67e8f9; }
-    .btn-pause:hover{ background: rgba(34, 197, 230, 0.16); border-color: #22c5e6; box-shadow: 0 0 15px rgba(34,197,230,0.15); }
 
     /* Modals (Glassmorphic Popups) */
     .modal-backdrop {
@@ -580,6 +575,164 @@
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
     }
+
+    /* Settings Modal — wider */
+    .modal-settings {
+      max-width: 640px;
+    }
+
+    .settings-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 55vh;
+      overflow-y: auto;
+      padding-right: 8px;
+      margin-bottom: 20px;
+    }
+    .settings-form::-webkit-scrollbar { width: 5px; }
+    .settings-form::-webkit-scrollbar-track { background: transparent; }
+    .settings-form::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    .setting-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: var(--transition);
+    }
+    .setting-row:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .setting-row.is-locked {
+      border-color: rgba(244, 63, 94, 0.25);
+      background: rgba(244, 63, 94, 0.04);
+    }
+
+    .setting-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .setting-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .setting-current {
+      font-size: 11px;
+      color: rgba(148, 163, 184, 0.6);
+      margin-bottom: 8px;
+      word-break: break-all;
+      font-style: italic;
+    }
+
+    .setting-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .setting-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .setting-textarea {
+      width: 100%;
+      min-height: 60px;
+      max-height: 120px;
+      resize: vertical;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .setting-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .lock-btn {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      font-size: 16px;
+      transition: var(--transition);
+      margin-top: 22px;
+    }
+    .lock-btn:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+    }
+    .lock-btn.locked {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.15);
+    }
+
+    .pending-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde047;
+      margin-left: 10px;
+    }
+
+    .settings-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .settings-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .btn-settings {
+      background: rgba(79, 140, 255, 0.08);
+      border-color: rgba(79, 140, 255, 0.2);
+      color: #93c5fd;
+    }
+    .btn-settings:hover {
+      background: rgba(79, 140, 255, 0.16);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(79, 140, 255, 0.15);
+    }
   </style>
 </head>
 <body>
@@ -613,10 +766,6 @@
         <div class="stat-k" style="color: #fda4af;">Killed</div>
         <div class="stat-v" id="statKilled" style="color: var(--red);">0</div>
       </div>
-      <div class="stat-card" style="border-color: rgba(34, 197, 230, 0.15);">
-        <div class="stat-k" style="color: #67e8f9;">Paused</div>
-        <div class="stat-v" id="statPaused" style="color: #22c5e6;">0</div>
-      </div>
       <div class="stat-card">
         <div class="stat-k">Last Activity</div>
         <div class="stat-v" id="statLastActivity">--</div>
@@ -632,7 +781,6 @@
       <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">All</button>
         <button class="filter-tab" data-filter="active">Active</button>
-        <button class="filter-tab" data-filter="paused">Paused</button>
         <button class="filter-tab" data-filter="killed">Killed</button>
         <button class="filter-tab" data-filter="update_available">Update Pending</button>
       </div>
@@ -685,28 +833,24 @@
     </div>
   </div>
 
-  <!-- Pause Modal Dialog -->
-  <div class="modal-backdrop" id="pauseModal">
-    <div class="modal">
-      <div class="modal-title" style="color: #22c5e6;">
-        <span>⏸️</span> Pause Software Process
+  <!-- Settings Modal Dialog -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal modal-settings">
+      <div class="settings-header-row">
+        <div class="modal-title" style="color: var(--accent); margin-bottom: 0;">
+          <span>⚙️</span> Remote Settings Control
+          <span class="pending-badge" id="settingsPendingBadge" style="display:none;">⏳ Pending</span>
+        </div>
       </div>
-      <div class="modal-body">
-        <label for="pauseMinutesSelect">Pause Duration:</label>
-        <select class="modal-input" id="pauseMinutesSelect">
-          <option value="0">Immediate Close (No Restart)</option>
-          <option value="5">5 Minutes + Auto-Restart</option>
-          <option value="10">10 Minutes + Auto-Restart</option>
-          <option value="50">50 Minutes + Auto-Restart</option>
-          <option value="custom">Custom Minutes</option>
-        </select>
-        <input class="modal-input" type="number" id="pauseCustomMinutes" placeholder="Enter custom minutes" style="display:none; margin-top:12px;" min="1" max="10080" />
-        <label for="pauseReasonInput" style="margin-top:12px;">Reason (Optional):</label>
-        <input class="modal-input" type="text" id="pauseReasonInput" placeholder="e.g. Scheduled maintenance, patch application..." />
+      <div class="settings-subtitle" id="settingsSubtitle">Loading...</div>
+
+      <div class="settings-form" id="settingsForm">
+        <!-- Dynamically populated by JS -->
       </div>
+
       <div class="modal-btns">
-        <button class="modal-btn modal-btn-cancel" onclick="closeModal('pauseModal')">Cancel</button>
-        <button class="modal-btn" style="background: #22c5e6; color: var(--bg);" id="confirmPauseBtn">Pause Software</button>
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('settingsModal')">Close</button>
+        <button class="modal-btn" style="background: var(--accent); color: var(--bg); font-weight: 800;" id="pushSettingsBtn">⬆ Push Settings</button>
       </div>
     </div>
   </div>
@@ -744,7 +888,7 @@
       if (type === 'success') icon = '✅';
       if (type === 'error') icon = '❌';
       
-      toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+      toast.innerHTML = `<span>${escapeHtml(icon)}</span><span>${escapeHtml(message)}</span>`;
       container.appendChild(toast);
       
       setTimeout(() => toast.classList.add('show'), 10);
@@ -758,10 +902,40 @@
 
     function safeStr(v){ return (v === undefined || v === null || v === '') ? '—' : String(v); }
 
+    function escapeHtml(v){
+      if(v === undefined || v === null) return '';
+      return String(v).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[ch]));
+    }
+
+    function escapeAttr(v){ return escapeHtml(v); }
+
+    function jsArg(v){
+      return String(v || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n')
+        .replace(/</g, '\\x3C')
+        .replace(/>/g, '\\x3E')
+        .replace(/&/g, '\\x26')
+        .replace(/"/g, '&quot;');
+    }
+
+    function domId(v){
+      return String(v || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_');
+    }
+
+    function safeStr(v){ return (v === undefined || v === null || v === '') ? '--' : escapeHtml(v); }
+
     function statusBadge(status){
       if(status === 'active') return '<span class="badge badge-active">ACTIVE</span>';
       if(status === 'killed') return '<span class="badge badge-killed">KILLED</span>';
-      if(status === 'paused') return '<span class="badge badge-paused">PAUSED</span>';
       if(status === 'update_available') return '<span class="badge badge-update">UPDATE PENDING</span>';
       return '<span class="badge badge-update">' + safeStr(status).toUpperCase() + '</span>';
     }
@@ -793,11 +967,6 @@
       } else if (modalId === 'updateModal') {
         document.getElementById('updateUrlInput').value = '';
         setTimeout(() => document.getElementById('updateUrlInput').focus(), 100);
-      } else if (modalId === 'pauseModal') {
-        document.getElementById('pauseMinutesSelect').value = '5';
-        document.getElementById('pauseCustomMinutes').style.display = 'none';
-        document.getElementById('pauseReasonInput').value = '';
-        setTimeout(() => document.getElementById('pauseMinutesSelect').focus(), 100);
       }
     }
 
@@ -836,45 +1005,213 @@
       }
     });
 
-    // Pause select handler - show/hide custom input
-    document.getElementById('pauseMinutesSelect').addEventListener('change', (e) => {
-      const customInput = document.getElementById('pauseCustomMinutes');
-      if (e.target.value === 'custom') {
-        customInput.style.display = 'block';
-        customInput.focus();
-      } else {
-        customInput.style.display = 'none';
-      }
-    });
+    // ═══════════════════════════════════════════════════════
+    //  SETTINGS MODAL — Remote Settings Control + Lock
+    // ═══════════════════════════════════════════════════════
 
-    document.getElementById('confirmPauseBtn').addEventListener('click', async () => {
-      const softwareId = activeActionSoftwareId;
-      let pauseMinutes = document.getElementById('pauseMinutesSelect').value;
-      
-      if (pauseMinutes === 'custom') {
-        pauseMinutes = parseInt(document.getElementById('pauseCustomMinutes').value, 10);
-        if (isNaN(pauseMinutes) || pauseMinutes < 0) {
-          showToast('Please enter a valid pause duration', 'error');
-          return;
-        }
-      } else {
-        pauseMinutes = parseInt(pauseMinutes, 10);
+    // Settings field definitions
+    const SETTINGS_FIELDS = [
+      { key: 'active_bom',   label: 'Active BOM',         type: 'text',     placeholder: 'e.g. MainBOM_Rev1.xlsx' },
+      { key: 'printer',      label: 'Printer Name',       type: 'text',     placeholder: 'e.g. ZDesigner ZT230' },
+      { key: 'bartender_exe',label: 'BarTender EXE Path',  type: 'text',     placeholder: 'C:\\Program Files\\Seagull\\...' },
+      { key: 'templates.polaris', label: 'Template — Polaris', type: 'text', placeholder: 'C:\\labels\\polaris.btw' },
+      { key: 'templates.minda',   label: 'Template — Minda',   type: 'text', placeholder: 'C:\\labels\\minda.btw' },
+      { key: 'templates.solder',  label: 'Template — Solder',  type: 'text', placeholder: 'C:\\labels\\solder.btw' },
+      { key: 'last_mode',    label: 'Last Mode',           type: 'text',     placeholder: 'manual / auto' },
+      { key: 'column_mapping',       label: 'Column Mapping (JSON)',       type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
+      { key: 'minda_column_mapping', label: 'Minda Column Mapping (JSON)', type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
+    ];
+
+    // Current settings modal state
+    let settingsModalState = {
+      softwareId: null,
+      currentSettings: {},
+      pendingSettings: {},
+      lockedSettings: [],
+    };
+
+    function getNestedValue(obj, dotKey) {
+      const parts = dotKey.split('.');
+      let val = obj;
+      for (const p of parts) {
+        if (val == null) return '';
+        val = val[p];
       }
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'object') return JSON.stringify(val, null, 2);
+      return String(val);
+    }
+
+    function resolveSettingKey(dotKey) {
+      // For lock checking: 'templates.polaris' → check both 'templates.polaris' and 'templates'
+      return dotKey;
+    }
+
+    async function openSettingsModal(softwareId) {
+      settingsModalState.softwareId = softwareId;
+      document.getElementById('settingsSubtitle').textContent = 'Loading settings for ' + softwareId + '...';
+      document.getElementById('settingsForm').innerHTML = '';
+      document.getElementById('settingsPendingBadge').style.display = 'none';
       
-      const reason = document.getElementById('pauseReasonInput').value.trim() || 'Paused from dashboard';
-      closeModal('pauseModal');
-      
+      // Open modal
+      document.getElementById('settingsModal').classList.add('open');
+
       try {
-        await postJSON('/api/admin/pause', { software_id: softwareId, pause_minutes: pauseMinutes, reason });
-        const msg = pauseMinutes === 0 
-          ? `${softwareId} will close immediately`
-          : `${softwareId} will pause and restart after ${pauseMinutes} minute(s)`;
-        showToast(msg, 'success');
-        await refresh();
+        const res = await fetch('/api/admin/settings/' + encodeURIComponent(softwareId));
+        if (!res.ok) throw new Error('Failed to fetch settings');
+        const data = await res.json();
+
+        settingsModalState.currentSettings = data.current_settings || {};
+        settingsModalState.pendingSettings = data.pending_settings || {};
+        settingsModalState.lockedSettings = data.locked_settings || [];
+
+        // Show pending badge if there are pending settings
+        const hasPending = data.pending_settings && Object.keys(data.pending_settings).length > 0;
+        document.getElementById('settingsPendingBadge').style.display = hasPending ? 'inline-flex' : 'none';
+
+        document.getElementById('settingsSubtitle').textContent = softwareId + ' — Edit values and push to software';
+        buildSettingsForm();
       } catch (err) {
-        showToast(err.message || 'Failed to pause process', 'error');
+        document.getElementById('settingsSubtitle').textContent = 'Error: ' + err.message;
+        showToast('Failed to load settings: ' + err.message, 'error');
       }
-    });
+    }
+
+    function buildSettingsForm() {
+      const form = document.getElementById('settingsForm');
+      form.innerHTML = '';
+      const { currentSettings, pendingSettings, lockedSettings } = settingsModalState;
+
+      for (const field of SETTINGS_FIELDS) {
+        const isLocked = lockedSettings.includes(field.key);
+        const rawCurrentVal = getNestedValue(currentSettings, field.key);
+        const currentVal = escapeHtml(rawCurrentVal);
+        const pendingVal = getNestedValue(pendingSettings, field.key);
+
+        const row = document.createElement('div');
+        row.className = 'setting-row' + (isLocked ? ' is-locked' : '');
+        row.setAttribute('data-key', field.key);
+
+        const inputId = 'setting-' + field.key.replace(/\./g, '-');
+        const inputValue = pendingVal || rawCurrentVal;
+
+        let inputHtml;
+        if (field.type === 'json') {
+          inputHtml = `<textarea class="setting-textarea" id="${escapeAttr(inputId)}" placeholder="${escapeAttr(field.placeholder)}">${escapeHtml(inputValue)}</textarea>`;
+        } else {
+          inputHtml = `<input class="setting-input" type="text" id="${escapeAttr(inputId)}" value="${escapeAttr(inputValue)}" placeholder="${escapeAttr(field.placeholder)}" />`;
+        }
+
+        row.innerHTML = `
+          <div class="setting-info">
+            <div class="setting-label">${escapeHtml(field.label)}</div>
+            <div class="setting-current">Current: ${currentVal || '—'}</div>
+            ${inputHtml}
+          </div>
+          <button class="lock-btn ${isLocked ? 'locked' : ''}" type="button" title="${isLocked ? 'Unlock this setting' : 'Lock this setting'}" onclick="toggleLock('${jsArg(field.key)}', this)">
+            ${isLocked ? '🔒' : '🔓'}
+          </button>
+        `;
+
+        form.appendChild(row);
+      }
+    }
+
+    function toggleLock(settingKey, btn) {
+      const idx = settingsModalState.lockedSettings.indexOf(settingKey);
+      if (idx >= 0) {
+        // Unlock
+        settingsModalState.lockedSettings.splice(idx, 1);
+        btn.classList.remove('locked');
+        btn.innerHTML = '🔓';
+        btn.title = 'Lock this setting';
+        btn.closest('.setting-row').classList.remove('is-locked');
+      } else {
+        // Lock
+        settingsModalState.lockedSettings.push(settingKey);
+        btn.classList.add('locked');
+        btn.innerHTML = '🔒';
+        btn.title = 'Unlock this setting';
+        btn.closest('.setting-row').classList.add('is-locked');
+      }
+    }
+
+    async function pushSettings() {
+      const softwareId = settingsModalState.softwareId;
+      if (!softwareId) return;
+
+      // Collect values from form
+      const settings = {};
+      const templates = {};
+      let hasTemplateChanges = false;
+
+      for (const field of SETTINGS_FIELDS) {
+        const inputId = 'setting-' + field.key.replace(/\./g, '-');
+        const el = document.getElementById(inputId);
+        if (!el) continue;
+
+        let value = el.value.trim();
+        if (!value) continue; // Skip empty fields — don't push blanks
+
+        // Parse JSON fields
+        if (field.type === 'json') {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            showToast(`Invalid JSON in "${field.label}". Fix and retry.`, 'error');
+            el.focus();
+            return;
+          }
+        }
+
+        const existingRaw = getNestedValue(settingsModalState.pendingSettings, field.key) || getNestedValue(settingsModalState.currentSettings, field.key);
+        if (field.type === 'json') {
+          let existingParsed = null;
+          try {
+            existingParsed = existingRaw ? JSON.parse(existingRaw) : null;
+          } catch (e) {
+            existingParsed = existingRaw;
+          }
+          if (JSON.stringify(value) === JSON.stringify(existingParsed)) continue;
+        } else if (String(value) === String(existingRaw || '').trim()) {
+          continue;
+        }
+
+        // Handle nested template keys
+        if (field.key.startsWith('templates.')) {
+          const subKey = field.key.split('.')[1];
+          templates[subKey] = value;
+          hasTemplateChanges = true;
+        } else {
+          settings[field.key] = value;
+        }
+      }
+
+      if (hasTemplateChanges) {
+        settings['templates'] = templates;
+      }
+
+      if (Object.keys(settings).length === 0 && settingsModalState.lockedSettings.length === 0) {
+        showToast('No settings to push', 'info');
+        return;
+      }
+
+      try {
+        await postJSON('/api/admin/settings', {
+          software_id: softwareId,
+          settings: Object.keys(settings).length > 0 ? settings : undefined,
+          locked_settings: settingsModalState.lockedSettings,
+        });
+        showToast('Settings pushed! Will apply on next heartbeat.', 'success');
+        document.getElementById('settingsPendingBadge').style.display = 'inline-flex';
+      } catch (err) {
+        showToast('Failed to push settings: ' + (err.message || 'Unknown error'), 'error');
+      }
+    }
+
+    document.getElementById('pushSettingsBtn').addEventListener('click', pushSettings);
+
+    // ═══════════════════════════════════════════════════════
 
     async function apiList(){
       const res = await fetch('/api/admin/list', { method: 'GET' });
@@ -902,7 +1239,6 @@
       const values = Object.values(softwaresDict || {});
       let total = values.length;
       let active = values.filter(s => s.status === 'active').length;
-      let paused = values.filter(s => s.status === 'paused').length;
       let killed = values.filter(s => s.status === 'killed').length;
       let lastTs = null;
       for(const s of values){
@@ -913,7 +1249,6 @@
       return {
         total,
         active,
-        paused,
         killed,
         lastActivity: lastTs ? minutesAgo(lastTs) : '--'
       };
@@ -924,9 +1259,7 @@
       const stats = computeStats(softwares);
       document.getElementById('statTotal').textContent = stats.total;
       document.getElementById('statActive').textContent = stats.active;
-      document.getElementById('statPaused').textContent = stats.paused;
       document.getElementById('statKilled').textContent = stats.killed;
-      document.getElementById('statLastActivity').textContent = stats.lastActivity;
       document.getElementById('statLastActivity').textContent = stats.lastActivity;
 
       // Filter and Sort softwares list
@@ -969,13 +1302,16 @@
       }
 
       for(const software of list){
-        const softwareId = safeStr(software.software_id);
+        const softwareKey = String(software.software_id || '');
+        const softwareId = safeStr(softwareKey);
+        const softwareDomId = domId(softwareKey);
+        const softwareJs = jsArg(softwareKey);
         const machineName = safeStr(software.machine_name);
         const version = safeStr(software.version);
         const osName = safeStr(software.os_name);
         const ipAddress = safeStr(software.ip_address);
         const lastSeenFull = software.last_seen ? new Date(software.last_seen*1000).toLocaleString() : '—';
-        const notesValue = notes[softwareId] || '';
+        const notesValue = escapeHtml(notes[softwareKey] || '');
 
         const card = document.createElement('div');
         card.className = `soft-card card-${software.status}`;
@@ -999,22 +1335,22 @@
           <div class="note">
             <div class="k-row">
               <div class="k">Notes / Remarks</div>
-              <div class="save-indicator" id="save-${softwareId}">Saved</div>
+              <div class="save-indicator" id="save-${softwareDomId}">Saved</div>
             </div>
-            <textarea placeholder="Write administrative remark..." data-software-id="${softwareId}">${notesValue}</textarea>
+            <textarea placeholder="Write administrative remark..." data-software-id="${escapeAttr(softwareKey)}" data-software-dom-id="${softwareDomId}">${notesValue}</textarea>
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-pause" type="button" onclick="openModal('pauseModal', '${softwareId}')">Pause</button>
-            <button class="btn btn-kill" type="button" onclick="openModal('killModal', '${softwareId}')">Kill</button>
-            <button class="btn btn-activate" type="button" id="act-${softwareId}">Activate</button>
-            <button class="btn btn-update" type="button" onclick="openModal('updateModal', '${softwareId}')">Push Update</button>
+            <button class="btn btn-kill" type="button" onclick="openModal('killModal', '${softwareJs}')">Kill</button>
+            <button class="btn btn-activate" type="button" id="act-${softwareDomId}">Activate</button>
+            <button class="btn btn-update" type="button" onclick="openModal('updateModal', '${softwareJs}')">Push Update</button>
+            <button class="btn btn-settings" type="button" onclick="openSettingsModal('${softwareId}')">⚙️ Settings</button>
           </div>
         `;
 
         // Wire notes textarea autosave
-        const ta = card.querySelector('textarea[data-software-id="'+softwareId+'"]');
-        const indicator = card.querySelector(`#save-${softwareId}`);
+        const ta = card.querySelector('textarea[data-software-dom-id="'+softwareDomId+'"]');
+        const indicator = card.querySelector(`#save-${softwareDomId}`);
         let debounceTimer = null;
         
         ta.addEventListener('input', (e) => {
@@ -1024,9 +1360,9 @@
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(async () => {
             const newNote = e.target.value;
-            notes[softwareId] = newNote;
+            notes[softwareKey] = newNote;
             try {
-              await postJSON('/api/admin/save_notes', { software_id: softwareId, notes: newNote });
+              await postJSON('/api/admin/save_notes', { software_id: softwareKey, notes: newNote });
               indicator.textContent = 'Saved';
               indicator.className = 'save-indicator saved';
             } catch(err) {
@@ -1038,15 +1374,19 @@
         });
 
         // Wire activate button
-        card.querySelector(`#act-${softwareId}`).addEventListener('click', async () => {
+        card.querySelector(`#act-${softwareDomId}`).addEventListener('click', async () => {
           try {
-            await postJSON('/api/admin/activate', { software_id: softwareId });
-            showToast(`Process ${softwareId} status updated to Active`, 'success');
+            await postJSON('/api/admin/activate', { software_id: softwareKey });
+            showToast(`Process ${softwareKey} status updated to Active`, 'success');
             await refresh();
           } catch(err) {
             showToast(err.message || 'Activation failed', 'error');
           }
         });
+
+        const settingsBtn = card.querySelector('.btn-settings');
+        settingsBtn.removeAttribute('onclick');
+        settingsBtn.addEventListener('click', () => openSettingsModal(softwareKey));
 
         grid.appendChild(card);
       }
