@@ -17,4 +17,6 @@ services:
         sync: false
       - key: REQUIRE_CLIENT_AUTH
         value: "1"
+      - key: CLIENT_POLL_SECONDS
+        value: "15"
 

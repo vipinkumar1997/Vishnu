@@ -3,1446 +3,887 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Remote Software Control - Dashboard</title>
-  <!-- Outfit Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <title>Vishnu Control</title>
   <style>
-    :root{
-      --bg: #080c14;
-      --glass-bg: rgba(18, 26, 47, 0.45);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-glow: rgba(79, 140, 255, 0.05);
-      --text: #f0f4f9;
-      --muted: #94a3b8;
-      
-      --accent: #4f8cff;
-      --accent-glow: rgba(79, 140, 255, 0.25);
-      
-      --green: #10b981;
-      --green-glow: rgba(16, 185, 129, 0.15);
-      
-      --red: #f43f5e;
-      --red-glow: rgba(244, 63, 94, 0.15);
-      
-      --orange: #f59e0b;
-      --orange-glow: rgba(245, 158, 11, 0.15);
-
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    :root {
+      --bg: #f5f6f2;
+      --surface: #ffffff;
+      --surface-2: #eef1ed;
+      --ink: #18211d;
+      --muted: #647067;
+      --line: #d8ded6;
+      --line-strong: #b9c3b8;
+      --green: #167a4a;
+      --green-soft: #e5f4ec;
+      --red: #ba2f45;
+      --red-soft: #f9e8eb;
+      --amber: #a6670c;
+      --amber-soft: #fff0d2;
+      --teal: #126b73;
+      --teal-soft: #e2f3f5;
+      --shadow: 0 14px 30px rgba(32, 45, 38, 0.08);
+      --radius: 8px;
     }
 
-    *{ 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0;
-    }
-
-    body{
-      background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 0.8) 0%, rgba(8, 12, 20, 1) 90%), var(--bg);
-      color: var(--text);
-      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
       min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 60px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+      letter-spacing: 0;
     }
 
-    .page{ 
-      padding: 24px; 
-      max-width: 1240px; 
-      margin: 0 auto; 
+    button, input, select, textarea {
+      font: inherit;
+      letter-spacing: 0;
     }
 
-    /* Header */
-    .header{
+    button {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 36px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--line-strong); background: var(--surface-2); }
+    button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    button.good { background: var(--green); border-color: var(--green); color: #fff; }
+    button.warn { background: var(--amber-soft); border-color: #e1b861; color: var(--amber); }
+    button.danger { background: var(--red); border-color: var(--red); color: #fff; }
+    button.ghost { background: transparent; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .page {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 20px 0 40px;
+    }
+
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
-      padding: 20px 24px;
-      border-radius: var(--radius-lg);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      -webkit-backdrop-filter: blur(16px);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-      margin-bottom: 24px;
-    }
-    
-    .title-wrap{ 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
-    }
-    
-    .title{
-      display: flex; 
-      align-items: center; 
-      gap: 12px;
-      font-weight: 800;
-      font-size: 22px;
-      letter-spacing: -0.5px;
-    }
-
-    .title span.icon {
-      display: inline-flex;
-      width: 32px;
-      height: 32px;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-md);
-      background: var(--accent-glow);
-      border: 1px solid rgba(79, 140, 255, 0.3);
-      color: var(--accent);
-      font-weight: bold;
-    }
-    
-    .sub{
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .logout{
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 700;
-      font-size: 14px;
-      padding: 10px 20px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--glass-border);
-      background: rgba(255, 255, 255, 0.03);
-      transition: var(--transition);
-      cursor: pointer;
-    }
-    .logout:hover{ 
-      border-color: var(--red); 
-      background: rgba(244, 63, 94, 0.1);
-      box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
-    }
-
-    /* Top stats row */
-    .stats{
-      display: grid;
-      grid-template-columns: repeat(4, minmax(180px, 1fr));
       gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card{
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      transition: var(--transition);
-    }
-    .stat-card:hover{
-      transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-    .stat-k{ color: var(--muted); font-size: 13px; font-weight: 500; margin-bottom: 8px; }
-    .stat-v{ font-size: 28px; font-weight: 900; letter-spacing: -0.5px; }
-
-    /* Control Bar (Search, Filters, Sort) */
-    .control-bar{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-    }
-
-    .search-input-wrap {
-      flex: 1;
-      min-width: 260px;
-      position: relative;
-    }
-
-    .search-input-wrap input {
-      width: 100%;
-      padding: 12px 16px 12px 42px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--glass-border);
-      background: rgba(0, 0, 0, 0.2);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .search-input-wrap input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-glow);
-    }
-    .search-input-wrap::before {
-      content: "🔍";
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-      opacity: 0.6;
-    }
-
-    .filter-tabs {
-      display: flex;
-      gap: 8px;
-    }
-
-    .filter-tab {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--glass-border);
-      color: var(--muted);
-      padding: 10px 16px;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .filter-tab:hover {
-      color: var(--text);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-    .filter-tab.active {
-      background: var(--accent-glow);
-      border-color: var(--accent);
-      color: #fff;
-      box-shadow: 0 0 15px rgba(79, 140, 255, 0.15);
-    }
-
-    .sort-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .sort-wrap label {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .sort-select {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--glass-border);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    /* Grid */
-    .grid{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    @media (max-width: 900px){
-      .stats{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
-      .grid{ grid-template-columns: 1fr; }
-      .control-bar { flex-direction: column; align-items: stretch; }
-      .filter-tabs { overflow-x: auto; padding-bottom: 4px; }
-    }
-
-    .soft-card{
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.25);
-      -webkit-backdrop-filter: blur(16px);
-      backdrop-filter: blur(16px);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    .soft-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: var(--accent);
-      transition: var(--transition);
-    }
-    .soft-card.card-active::before { background: var(--green); }
-    .soft-card.card-killed::before { background: var(--red); }
-    .soft-card.card-update_available::before { background: var(--orange); }
-
-    .soft-card:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .soft-top{
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .soft-name{
-      font-size: 17px;
-      font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: -0.2px;
-    }
-
-    .badge{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      border: 1px solid transparent;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .badge-active{ background: var(--green-glow); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
-    .badge-killed{ background: var(--red-glow); border-color: rgba(244,63,94,0.3); color: #fda4af; }
-    .badge-update{ background: var(--orange-glow); border-color: rgba(245,158,11,0.3); color: #fde047; }
-
-    .info-grid{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .info{
-      background: rgba(255,255,255,0.015);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: var(--radius-md);
-      padding: 12px;
-      transition: var(--transition);
-    }
-    .info:hover {
-      background: rgba(255,255,255,0.03);
-    }
-
-    .info .k{ color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .info .v{ font-size: 14px; font-weight: 700; word-break: break-all; }
-
-    .info-last{ grid-column: 1 / -1; }
-
-    .note{
-      margin-bottom: 18px;
-      background: rgba(255,255,255,0.015);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: var(--radius-md);
-      padding: 12px;
-      position: relative;
-    }
-    .note .k-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .note .k{ color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .save-indicator {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
-      transition: var(--transition);
-    }
-    .save-indicator.saving { color: var(--orange); }
-    .save-indicator.saved { color: var(--green); }
-
-    textarea{
-      width: 100%;
-      resize: vertical;
-      min-height: 60px;
-      max-height: 180px;
-      background: transparent;
-      border: 0;
-      outline: none;
-      color: var(--text);
-      font-family: inherit;
-      font-weight: 500;
-      font-size: 13.5px;
-      line-height: 1.5;
-    }
-
-    .btn-row{ display: flex; gap: 10px; }
-
-    .btn{
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      border: 1px solid var(--glass-border);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      font-family: inherit;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      flex: 1;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn:hover{ border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
-
-    .btn-kill{ background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.2); color: #fda4af; }
-    .btn-kill:hover{ background: rgba(244, 63, 94, 0.16); border-color: var(--red); box-shadow: 0 0 15px rgba(244,63,94,0.15); }
-    
-    .btn-activate{ background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-    .btn-activate:hover{ background: rgba(16, 185, 129, 0.16); border-color: var(--green); box-shadow: 0 0 15px rgba(16,185,129,0.15); }
-    
-    .btn-update{ background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); color: #fde047; }
-    .btn-update:hover{ background: rgba(245, 158, 11, 0.16); border-color: var(--orange); box-shadow: 0 0 15px rgba(245,158,11,0.15); }
-
-    /* Modals (Glassmorphic Popups) */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(4, 8, 16, 0.7);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .modal-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      width: 90%;
-      max-width: 440px;
-      padding: 24px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-      transform: scale(0.9);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-backdrop.open .modal {
-      transform: scale(1);
-    }
-
-    .modal-title {
-      font-size: 19px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .modal-body {
-      margin-bottom: 20px;
-    }
-
-    .modal-body label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .modal-input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--glass-border);
-      background: rgba(0, 0, 0, 0.3);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .modal-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-glow);
-    }
-
-    .modal-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-    
-    .modal-btn {
-      padding: 10px 20px;
-      font-weight: 700;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 14px;
-      border: 1px solid transparent;
-      transition: var(--transition);
-    }
-    .modal-btn-cancel {
-      background: transparent;
-      border-color: var(--glass-border);
-      color: var(--muted);
-    }
-    .modal-btn-cancel:hover {
-      color: var(--text);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Toast System */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 1000;
-    }
-
-    .toast {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--glass-border);
-      padding: 14px 20px;
-      border-radius: var(--radius-md);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transform: translateX(120%);
-      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-      font-size: 14px;
-      font-weight: 600;
-      pointer-events: auto;
-    }
-    .toast.show {
-      transform: translateX(0);
-    }
-    .toast-success {
-      border-color: var(--green);
-      color: #6ee7b7;
-    }
-    .toast-error {
-      border-color: var(--red);
-      color: #fda4af;
-    }
-    .toast-info {
-      border-color: var(--accent);
-      color: #93c5fd;
-    }
-
-    .no-results {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
-      font-size: 16px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-    }
-
-    /* Settings Modal — wider */
-    .modal-settings {
-      max-width: 640px;
-    }
-
-    .settings-form {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-height: 55vh;
-      overflow-y: auto;
-      padding-right: 8px;
-      margin-bottom: 20px;
-    }
-    .settings-form::-webkit-scrollbar { width: 5px; }
-    .settings-form::-webkit-scrollbar-track { background: transparent; }
-    .settings-form::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-    .setting-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: rgba(255,255,255,0.015);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      transition: var(--transition);
-    }
-    .setting-row:hover {
-      background: rgba(255,255,255,0.03);
-    }
-    .setting-row.is-locked {
-      border-color: rgba(244, 63, 94, 0.25);
-      background: rgba(244, 63, 94, 0.04);
-    }
-
-    .setting-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .setting-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .setting-current {
-      font-size: 11px;
-      color: rgba(148, 163, 184, 0.6);
-      margin-bottom: 8px;
-      word-break: break-all;
-      font-style: italic;
-    }
-
-    .setting-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(0, 0, 0, 0.25);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .setting-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-
-    .setting-textarea {
-      width: 100%;
-      min-height: 60px;
-      max-height: 120px;
-      resize: vertical;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(0, 0, 0, 0.25);
-      color: var(--text);
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .setting-textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-
-    .lock-btn {
-      width: 38px;
-      height: 38px;
-      min-width: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(255,255,255,0.02);
-      cursor: pointer;
-      font-size: 16px;
-      transition: var(--transition);
-      margin-top: 22px;
-    }
-    .lock-btn:hover {
-      border-color: rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.06);
-    }
-    .lock-btn.locked {
-      background: rgba(244, 63, 94, 0.15);
-      border-color: rgba(244, 63, 94, 0.4);
-      box-shadow: 0 0 12px rgba(244, 63, 94, 0.15);
-    }
-
-    .pending-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fde047;
-      margin-left: 10px;
-    }
-
-    .settings-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       margin-bottom: 16px;
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+    h1 { margin: 0; font-size: 24px; line-height: 1.1; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .top-actions a { color: var(--ink); font-weight: 800; text-decoration: none; padding: 8px 10px; border-radius: 7px; }
+    .top-actions a:hover { background: var(--surface-2); }
 
-    .settings-subtitle {
-      font-size: 13px;
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    }
+    .metric .k { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .metric .v { font-size: 24px; font-weight: 900; margin-top: 4px; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .field, .select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 8px 10px;
+      color: var(--ink);
+      outline: none;
+    }
+    .field:focus, .select:focus, textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 14px;
+      align-items: start;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 12px;
+    }
+    .machine {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--line-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+    .machine.active { border-left-color: var(--green); }
+    .machine.paused { border-left-color: var(--amber); }
+    .machine.killed { border-left-color: var(--red); }
+    .machine.update_available { border-left-color: var(--teal); }
+    .machine.offline { opacity: .72; }
+
+    .machine-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+    .machine-name { font-size: 18px; font-weight: 900; overflow-wrap: anywhere; }
+    .machine-id { color: var(--muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+    }
+    .badge.active { background: var(--green-soft); color: var(--green); border-color: #b8dec8; }
+    .badge.paused { background: var(--amber-soft); color: var(--amber); border-color: #e6bf69; }
+    .badge.killed { background: var(--red-soft); color: var(--red); border-color: #efb1bb; }
+    .badge.update_available { background: var(--teal-soft); color: var(--teal); border-color: #a5d9de; }
+    .badge.offline { background: var(--surface-2); color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+      margin-bottom: 10px;
+    }
+    .kv div { min-width: 0; }
+    .kv .k { color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; }
+    .kv .v { font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
+
+    .card-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .card-actions button { min-width: 0; padding-left: 6px; padding-right: 6px; }
+
+    .note-row {
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+    }
+    .note-row label { color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+    .note-row textarea {
+      width: 100%;
+      min-height: 58px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+
+    .side {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      position: sticky;
+      top: 12px;
+    }
+    .side h2 { font-size: 16px; margin: 0 0 8px; }
+    .event-list { display: grid; gap: 8px; }
+    .event {
+      border-left: 3px solid var(--line-strong);
+      padding-left: 8px;
       color: var(--muted);
-      font-weight: 500;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .event strong { color: var(--ink); }
+
+    .empty {
+      background: var(--surface);
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      padding: 30px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 750;
     }
 
-    .btn-settings {
-      background: rgba(79, 140, 255, 0.08);
-      border-color: rgba(79, 140, 255, 0.2);
-      color: #93c5fd;
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13, 20, 17, .48);
+      padding: 18px;
+      z-index: 20;
     }
-    .btn-settings:hover {
-      background: rgba(79, 140, 255, 0.16);
-      border-color: var(--accent);
-      box-shadow: 0 0 15px rgba(79, 140, 255, 0.15);
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(760px, 100%);
+      max-height: min(86vh, 820px);
+      overflow: auto;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 30px 80px rgba(0,0,0,.22);
+      padding: 16px;
+    }
+    .modal.small { width: min(460px, 100%); }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-title { font-size: 18px; font-weight: 900; }
+    .modal-sub { color: var(--muted); font-size: 12px; margin-top: 4px; overflow-wrap: anywhere; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .form-grid { display: grid; gap: 10px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .form-row label { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; }
+    .form-row textarea { min-height: 84px; resize: vertical; }
+    .lock {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+    .lock input { width: 18px; height: 18px; }
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 30;
+      display: grid;
+      gap: 8px;
+      max-width: min(420px, calc(100vw - 32px));
+    }
+    .toast-item {
+      background: var(--ink);
+      color: #fff;
+      border-radius: 8px;
+      padding: 11px 13px;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1040px) {
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .layout { grid-template-columns: 1fr; }
+      .side { position: static; }
+    }
+    @media (max-width: 720px) {
+      .page { width: min(100% - 20px, 1440px); padding-top: 10px; }
+      .topbar, .top-actions { align-items: stretch; flex-direction: column; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .card-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    
-    <!-- Top Header -->
-    <div class="header">
-      <div class="title-wrap">
-        <div class="title">
-          <span class="icon">▦</span>
-          <span>Remote Software Control</span>
-        </div>
-        <div class="sub">
-          Auto-refresh active · Last updated: <span id="lastUpdatedText">--</span>
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">V</div>
+        <div>
+          <h1>Vishnu Control</h1>
+          <div class="sub">BTPrint remote operations console</div>
         </div>
       </div>
-      <a class="logout" href="/logout">Logout</a>
-    </div>
+      <div class="top-actions">
+        <button id="refreshBtn" class="primary" type="button">Refresh</button>
+        <button id="selectAllBtn" type="button">Show All</button>
+        <a href="/logout">Logout</a>
+      </div>
+    </header>
 
-    <!-- Stats Bar -->
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-k">Total Softwares</div>
-        <div class="stat-v" id="statTotal">0</div>
-      </div>
-      <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.15);">
-        <div class="stat-k" style="color: #6ee7b7;">Active</div>
-        <div class="stat-v" id="statActive" style="color: var(--green);">0</div>
-      </div>
-      <div class="stat-card" style="border-color: rgba(244, 63, 94, 0.15);">
-        <div class="stat-k" style="color: #fda4af;">Killed</div>
-        <div class="stat-v" id="statKilled" style="color: var(--red);">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-k">Last Activity</div>
-        <div class="stat-v" id="statLastActivity">--</div>
-      </div>
-    </div>
+    <section class="metrics" aria-label="Fleet status">
+      <div class="metric"><div class="k">Machines</div><div class="v" id="mTotal">0</div></div>
+      <div class="metric"><div class="k">Online</div><div class="v" id="mOnline">0</div></div>
+      <div class="metric"><div class="k">Active</div><div class="v" id="mActive">0</div></div>
+      <div class="metric"><div class="k">Paused</div><div class="v" id="mPaused">0</div></div>
+      <div class="metric"><div class="k">Killed</div><div class="v" id="mKilled">0</div></div>
+      <div class="metric"><div class="k">Pending</div><div class="v" id="mPending">0</div></div>
+    </section>
 
-    <!-- Search / Filter / Sort Panel -->
-    <div class="control-bar">
-      <div class="search-input-wrap">
-        <input type="text" id="searchInput" placeholder="Search by machine name, ID, IP or OS..." />
-      </div>
-      
-      <div class="filter-tabs">
-        <button class="filter-tab active" data-filter="all">All</button>
-        <button class="filter-tab" data-filter="active">Active</button>
-        <button class="filter-tab" data-filter="killed">Killed</button>
-        <button class="filter-tab" data-filter="update_available">Update Pending</button>
-      </div>
+    <section class="toolbar" aria-label="Fleet filters">
+      <input id="searchInput" class="field" type="search" placeholder="Search machine, ID, IP, OS" />
+      <select id="statusFilter" class="select" aria-label="Status filter">
+        <option value="all">All statuses</option>
+        <option value="online">Online only</option>
+        <option value="offline">Offline only</option>
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+        <option value="killed">Killed</option>
+        <option value="update_available">Update pending</option>
+      </select>
+      <select id="sortSelect" class="select" aria-label="Sort">
+        <option value="recent">Recent heartbeat</option>
+        <option value="name">Machine name</option>
+        <option value="status">Status</option>
+      </select>
+      <button id="clearFiltersBtn" type="button">Clear Filters</button>
+    </section>
 
-      <div class="sort-wrap">
-        <label for="sortSelect">Sort:</label>
-        <select class="sort-select" id="sortSelect">
-          <option value="recent">Last Seen (Recent)</option>
-          <option value="name">Machine Name</option>
-          <option value="id">Software ID</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Cards Grid -->
-    <div id="grid" class="grid"></div>
+    <main class="layout">
+      <section id="machineGrid" class="grid" aria-label="Machines"></section>
+      <aside class="side">
+        <h2>Operations Feed</h2>
+        <div class="hint" id="lastRefresh">Not refreshed yet</div>
+        <div class="event-list" id="eventList" style="margin-top:12px;"></div>
+      </aside>
+    </main>
   </div>
 
-  <!-- Kill Modal Dialog -->
-  <div class="modal-backdrop" id="killModal">
-    <div class="modal">
-      <div class="modal-title" style="color: var(--red);">
-        <span>☠️</span> Kill Software Process
+  <div class="modal-backdrop" id="actionModal">
+    <div class="modal small">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="actionTitle">Command</div>
+          <div class="modal-sub" id="actionSub"></div>
+        </div>
+        <button type="button" class="ghost" data-close-modal="actionModal">Close</button>
       </div>
-      <div class="modal-body">
-        <label for="killReasonInput">Reason / Remarks for termination:</label>
-        <input class="modal-input" type="text" id="killReasonInput" placeholder="e.g. License expired, unauthorized machine..." />
-      </div>
-      <div class="modal-btns">
-        <button class="modal-btn modal-btn-cancel" onclick="closeModal('killModal')">Cancel</button>
-        <button class="modal-btn" style="background: var(--red); color: white;" id="confirmKillBtn">Confirm Kill</button>
+      <div id="actionBody" class="form-grid"></div>
+      <div class="modal-actions">
+        <button type="button" data-close-modal="actionModal">Cancel</button>
+        <button type="button" class="primary" id="actionConfirm">Send Command</button>
       </div>
     </div>
   </div>
 
-  <!-- Update Modal Dialog -->
-  <div class="modal-backdrop" id="updateModal">
-    <div class="modal">
-      <div class="modal-title" style="color: var(--orange);">
-        <span>🚀</span> Push Update Package
-      </div>
-      <div class="modal-body">
-        <label for="updateUrlInput">Update script URL (.zip / .py / .exe):</label>
-        <input class="modal-input" type="url" id="updateUrlInput" placeholder="https://example.com/update.py" />
-      </div>
-      <div class="modal-btns">
-        <button class="modal-btn modal-btn-cancel" onclick="closeModal('updateModal')">Cancel</button>
-        <button class="modal-btn" style="background: var(--orange); color: var(--bg);" id="confirmUpdateBtn">Push Update</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal Dialog -->
   <div class="modal-backdrop" id="settingsModal">
-    <div class="modal modal-settings">
-      <div class="settings-header-row">
-        <div class="modal-title" style="color: var(--accent); margin-bottom: 0;">
-          <span>⚙️</span> Remote Settings Control
-          <span class="pending-badge" id="settingsPendingBadge" style="display:none;">⏳ Pending</span>
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Remote Settings</div>
+          <div class="modal-sub" id="settingsSub"></div>
         </div>
+        <button type="button" class="ghost" data-close-modal="settingsModal">Close</button>
       </div>
-      <div class="settings-subtitle" id="settingsSubtitle">Loading...</div>
-
-      <div class="settings-form" id="settingsForm">
-        <!-- Dynamically populated by JS -->
-      </div>
-
-      <div class="modal-btns">
-        <button class="modal-btn modal-btn-cancel" onclick="closeModal('settingsModal')">Close</button>
-        <button class="modal-btn" style="background: var(--accent); color: var(--bg); font-weight: 800;" id="pushSettingsBtn">⬆ Push Settings</button>
+      <div class="hint" id="settingsHint"></div>
+      <div class="form-grid" id="settingsForm" style="margin-top:10px;"></div>
+      <div class="modal-actions">
+        <button type="button" id="clearPendingBtn" class="warn">Clear Pending</button>
+        <button type="button" id="clearPendingLocksBtn" class="warn">Clear Pending + Locks</button>
+        <button type="button" id="pushSettingsBtn" class="primary">Push Settings</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast" id="toast"></div>
 
   <script>
-    // State
-    // eslint-disable-next-line
     const initialSoftwares = {{ softwares | tojson | safe }};
     let softwares = initialSoftwares || {};
-    const notes = {};
+    let filterStatus = 'all';
+    let searchText = '';
+    let sortMode = 'recent';
+    let actionState = null;
+    let settingsState = null;
+    const notesTimers = new Map();
+    const events = [];
 
-    // Modal target mapping
-    let activeActionSoftwareId = null;
+    const SETTINGS_FIELDS = [
+      { key: 'active_bom', label: 'Active BOM', type: 'text', placeholder: 'BOM_Rev1.xlsx' },
+      { key: 'printer', label: 'Printer Name', type: 'text', placeholder: 'ZDesigner ZT230' },
+      { key: 'btw_file', label: 'Fallback BTW', type: 'text', placeholder: 'C:\\Labels\\template.btw' },
+      { key: 'templates.polaris', label: 'Polaris BTW', type: 'text', placeholder: 'C:\\Labels\\polaris.btw' },
+      { key: 'templates.minda', label: 'Minda BTW', type: 'text', placeholder: 'C:\\Labels\\minda.btw' },
+      { key: 'templates.solder', label: 'Solder BTW', type: 'text', placeholder: 'C:\\Labels\\solder.btw' },
+      { key: 'last_mode', label: 'Default Mode', type: 'text', placeholder: 'manual' },
+      { key: 'column_mapping', label: 'Polaris Mapping', type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
+      { key: 'minda_column_mapping', label: 'Minda Mapping', type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
+    ];
 
-    // Filter / Sort States
-    let currentFilter = 'all';
-    let currentSearchQuery = '';
-    let currentSort = 'recent';
-
-    // Populate local notes map
-    for(const s of Object.values(softwares)){
-      notes[s.software_id] = s.notes || '';
-    }
-
-    // Toast Alert Helper
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      
-      let icon = 'ℹ️';
-      if (type === 'success') icon = '✅';
-      if (type === 'error') icon = '❌';
-      
-      toast.innerHTML = `<span>${escapeHtml(icon)}</span><span>${escapeHtml(message)}</span>`;
-      container.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 10);
-      
-      // Auto-remove toast
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-      }, 3500);
-    }
-
-    function safeStr(v){ return (v === undefined || v === null || v === '') ? '—' : String(v); }
-
-    function escapeHtml(v){
-      if(v === undefined || v === null) return '';
-      return String(v).replace(/[&<>"']/g, ch => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
       }[ch]));
     }
 
-    function escapeAttr(v){ return escapeHtml(v); }
-
-    function jsArg(v){
-      return String(v || '')
-        .replace(/\\/g, '\\\\')
-        .replace(/'/g, "\\'")
-        .replace(/\r/g, '\\r')
-        .replace(/\n/g, '\\n')
-        .replace(/</g, '\\x3C')
-        .replace(/>/g, '\\x3E')
-        .replace(/&/g, '\\x26')
-        .replace(/"/g, '&quot;');
+    function domId(value) {
+      return String(value || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_');
     }
 
-    function domId(v){
-      return String(v || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_');
-    }
-
-    function safeStr(v){ return (v === undefined || v === null || v === '') ? '--' : escapeHtml(v); }
-
-    function statusBadge(status){
-      if(status === 'active') return '<span class="badge badge-active">ACTIVE</span>';
-      if(status === 'killed') return '<span class="badge badge-killed">KILLED</span>';
-      if(status === 'update_available') return '<span class="badge badge-update">UPDATE PENDING</span>';
-      return '<span class="badge badge-update">' + safeStr(status).toUpperCase() + '</span>';
-    }
-
-    function minutesAgo(ts){
-      if(!ts) return '—';
-      const ms = (Date.now() - (ts*1000));
-      const mins = Math.floor(ms / 60000);
-      if(mins < 1) return 'Just now';
-      return mins + ' min ago';
-    }
-
-    function timeNowStr(){
-      const d = new Date();
-      const pad = (n)=>String(n).padStart(2,'0');
-      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-    }
-
-    // Modal Control functions
-    function openModal(modalId, softwareId) {
-      activeActionSoftwareId = softwareId;
-      const backdrop = document.getElementById(modalId);
-      backdrop.classList.add('open');
-      
-      // Clear inputs
-      if (modalId === 'killModal') {
-        document.getElementById('killReasonInput').value = '';
-        setTimeout(() => document.getElementById('killReasonInput').focus(), 100);
-      } else if (modalId === 'updateModal') {
-        document.getElementById('updateUrlInput').value = '';
-        setTimeout(() => document.getElementById('updateUrlInput').focus(), 100);
-      }
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('open');
-      activeActionSoftwareId = null;
-    }
-
-    // Modal Submission Handlers
-    document.getElementById('confirmKillBtn').addEventListener('click', async () => {
-      const softwareId = activeActionSoftwareId;
-      const reason = document.getElementById('killReasonInput').value.trim() || 'Killed from dashboard';
-      closeModal('killModal');
-      
-      try {
-        await postJSON('/api/admin/kill', { software_id: softwareId, reason });
-        showToast(`Process ${softwareId} marked as killed`, 'success');
-        await refresh();
-      } catch (err) {
-        showToast(err.message || 'Failed to kill process', 'error');
-      }
-    });
-
-    document.getElementById('confirmUpdateBtn').addEventListener('click', async () => {
-      const softwareId = activeActionSoftwareId;
-      const updateUrl = document.getElementById('updateUrlInput').value.trim();
-      if(!updateUrl){ showToast('Update URL is required', 'error'); return; }
-      closeModal('updateModal');
-      
-      try {
-        await postJSON('/api/admin/update', { software_id: softwareId, update_url: updateUrl });
-        showToast('Update package URL pushed successfully', 'success');
-        await refresh();
-      } catch (err) {
-        showToast(err.message || 'Failed to push update', 'error');
-      }
-    });
-
-    // ═══════════════════════════════════════════════════════
-    //  SETTINGS MODAL — Remote Settings Control + Lock
-    // ═══════════════════════════════════════════════════════
-
-    // Settings field definitions
-    const SETTINGS_FIELDS = [
-      { key: 'active_bom',   label: 'Active BOM',         type: 'text',     placeholder: 'e.g. MainBOM_Rev1.xlsx' },
-      { key: 'printer',      label: 'Printer Name',       type: 'text',     placeholder: 'e.g. ZDesigner ZT230' },
-      { key: 'bartender_exe',label: 'BarTender EXE Path',  type: 'text',     placeholder: 'C:\\Program Files\\Seagull\\...' },
-      { key: 'templates.polaris', label: 'Template — Polaris', type: 'text', placeholder: 'C:\\labels\\polaris.btw' },
-      { key: 'templates.minda',   label: 'Template — Minda',   type: 'text', placeholder: 'C:\\labels\\minda.btw' },
-      { key: 'templates.solder',  label: 'Template — Solder',  type: 'text', placeholder: 'C:\\labels\\solder.btw' },
-      { key: 'last_mode',    label: 'Last Mode',           type: 'text',     placeholder: 'manual / auto' },
-      { key: 'column_mapping',       label: 'Column Mapping (JSON)',       type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
-      { key: 'minda_column_mapping', label: 'Minda Column Mapping (JSON)', type: 'json', placeholder: '[{"column":"A","header":"BTPRINT","source":"label_data"}]' },
-    ];
-
-    // Current settings modal state
-    let settingsModalState = {
-      softwareId: null,
-      currentSettings: {},
-      pendingSettings: {},
-      lockedSettings: [],
-    };
-
-    function getNestedValue(obj, dotKey) {
-      const parts = dotKey.split('.');
-      let val = obj;
-      for (const p of parts) {
-        if (val == null) return '';
-        val = val[p];
+    function getNested(obj, key) {
+      const parts = key.split('.');
+      let val = obj || {};
+      for (const part of parts) {
+        if (val === null || val === undefined) return '';
+        val = val[part];
       }
       if (val === null || val === undefined) return '';
       if (typeof val === 'object') return JSON.stringify(val, null, 2);
       return String(val);
     }
 
-    function resolveSettingKey(dotKey) {
-      // For lock checking: 'templates.polaris' → check both 'templates.polaris' and 'templates'
-      return dotKey;
+    function setNested(obj, key, value) {
+      const parts = key.split('.');
+      let target = obj;
+      while (parts.length > 1) {
+        const part = parts.shift();
+        target[part] = target[part] || {};
+        target = target[part];
+      }
+      target[parts[0]] = value;
     }
 
-    async function openSettingsModal(softwareId) {
-      settingsModalState.softwareId = softwareId;
-      document.getElementById('settingsSubtitle').textContent = 'Loading settings for ' + softwareId + '...';
-      document.getElementById('settingsForm').innerHTML = '';
-      document.getElementById('settingsPendingBadge').style.display = 'none';
-      
-      // Open modal
-      document.getElementById('settingsModal').classList.add('open');
-
-      try {
-        const res = await fetch('/api/admin/settings/' + encodeURIComponent(softwareId));
-        if (!res.ok) throw new Error('Failed to fetch settings');
-        const data = await res.json();
-
-        settingsModalState.currentSettings = data.current_settings || {};
-        settingsModalState.pendingSettings = data.pending_settings || {};
-        settingsModalState.lockedSettings = data.locked_settings || [];
-
-        // Show pending badge if there are pending settings
-        const hasPending = data.pending_settings && Object.keys(data.pending_settings).length > 0;
-        document.getElementById('settingsPendingBadge').style.display = hasPending ? 'inline-flex' : 'none';
-
-        document.getElementById('settingsSubtitle').textContent = softwareId + ' — Edit values and push to software';
-        buildSettingsForm();
-      } catch (err) {
-        document.getElementById('settingsSubtitle').textContent = 'Error: ' + err.message;
-        showToast('Failed to load settings: ' + err.message, 'error');
-      }
+    function displayStatus(machine) {
+      if (!machine.online && machine.status === 'active') return 'offline';
+      return machine.status || 'active';
     }
 
-    function buildSettingsForm() {
-      const form = document.getElementById('settingsForm');
-      form.innerHTML = '';
-      const { currentSettings, pendingSettings, lockedSettings } = settingsModalState;
-
-      for (const field of SETTINGS_FIELDS) {
-        const isLocked = lockedSettings.includes(field.key);
-        const rawCurrentVal = getNestedValue(currentSettings, field.key);
-        const currentVal = escapeHtml(rawCurrentVal);
-        const pendingVal = getNestedValue(pendingSettings, field.key);
-
-        const row = document.createElement('div');
-        row.className = 'setting-row' + (isLocked ? ' is-locked' : '');
-        row.setAttribute('data-key', field.key);
-
-        const inputId = 'setting-' + field.key.replace(/\./g, '-');
-        const inputValue = pendingVal || rawCurrentVal;
-
-        let inputHtml;
-        if (field.type === 'json') {
-          inputHtml = `<textarea class="setting-textarea" id="${escapeAttr(inputId)}" placeholder="${escapeAttr(field.placeholder)}">${escapeHtml(inputValue)}</textarea>`;
-        } else {
-          inputHtml = `<input class="setting-input" type="text" id="${escapeAttr(inputId)}" value="${escapeAttr(inputValue)}" placeholder="${escapeAttr(field.placeholder)}" />`;
-        }
-
-        row.innerHTML = `
-          <div class="setting-info">
-            <div class="setting-label">${escapeHtml(field.label)}</div>
-            <div class="setting-current">Current: ${currentVal || '—'}</div>
-            ${inputHtml}
-          </div>
-          <button class="lock-btn ${isLocked ? 'locked' : ''}" type="button" title="${isLocked ? 'Unlock this setting' : 'Lock this setting'}" onclick="toggleLock('${jsArg(field.key)}', this)">
-            ${isLocked ? '🔒' : '🔓'}
-          </button>
-        `;
-
-        form.appendChild(row);
-      }
+    function statusLabel(status) {
+      return status === 'update_available' ? 'update' : status;
     }
 
-    function toggleLock(settingKey, btn) {
-      const idx = settingsModalState.lockedSettings.indexOf(settingKey);
-      if (idx >= 0) {
-        // Unlock
-        settingsModalState.lockedSettings.splice(idx, 1);
-        btn.classList.remove('locked');
-        btn.innerHTML = '🔓';
-        btn.title = 'Lock this setting';
-        btn.closest('.setting-row').classList.remove('is-locked');
-      } else {
-        // Lock
-        settingsModalState.lockedSettings.push(settingKey);
-        btn.classList.add('locked');
-        btn.innerHTML = '🔒';
-        btn.title = 'Unlock this setting';
-        btn.closest('.setting-row').classList.add('is-locked');
-      }
+    function timeLabel(epoch) {
+      if (!epoch) return '--';
+      const seconds = Math.max(0, Math.floor(Date.now() / 1000 - Number(epoch)));
+      if (seconds < 60) return `${seconds}s ago`;
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      return `${Math.floor(seconds / 3600)}h ago`;
     }
 
-    async function pushSettings() {
-      const softwareId = settingsModalState.softwareId;
-      if (!softwareId) return;
+    function pauseLabel(epoch) {
+      if (!epoch) return 'Manual resume';
+      const seconds = Math.max(0, Math.floor(Number(epoch) - Date.now() / 1000));
+      if (seconds < 60) return `${seconds}s left`;
+      return `${Math.ceil(seconds / 60)}m left`;
+    }
 
-      // Collect values from form
-      const settings = {};
-      const templates = {};
-      let hasTemplateChanges = false;
+    function toast(message) {
+      const host = document.getElementById('toast');
+      const item = document.createElement('div');
+      item.className = 'toast-item';
+      item.textContent = message;
+      host.appendChild(item);
+      setTimeout(() => item.remove(), 3600);
+    }
 
-      for (const field of SETTINGS_FIELDS) {
-        const inputId = 'setting-' + field.key.replace(/\./g, '-');
-        const el = document.getElementById(inputId);
-        if (!el) continue;
+    function pushEvent(title, body) {
+      events.unshift({ title, body, at: new Date().toLocaleTimeString() });
+      events.splice(8);
+      renderEvents();
+    }
 
-        let value = el.value.trim();
-        if (!value) continue; // Skip empty fields — don't push blanks
-
-        // Parse JSON fields
-        if (field.type === 'json') {
-          try {
-            value = JSON.parse(value);
-          } catch (e) {
-            showToast(`Invalid JSON in "${field.label}". Fix and retry.`, 'error');
-            el.focus();
-            return;
-          }
-        }
-
-        const existingRaw = getNestedValue(settingsModalState.pendingSettings, field.key) || getNestedValue(settingsModalState.currentSettings, field.key);
-        if (field.type === 'json') {
-          let existingParsed = null;
-          try {
-            existingParsed = existingRaw ? JSON.parse(existingRaw) : null;
-          } catch (e) {
-            existingParsed = existingRaw;
-          }
-          if (JSON.stringify(value) === JSON.stringify(existingParsed)) continue;
-        } else if (String(value) === String(existingRaw || '').trim()) {
-          continue;
-        }
-
-        // Handle nested template keys
-        if (field.key.startsWith('templates.')) {
-          const subKey = field.key.split('.')[1];
-          templates[subKey] = value;
-          hasTemplateChanges = true;
-        } else {
-          settings[field.key] = value;
-        }
-      }
-
-      if (hasTemplateChanges) {
-        settings['templates'] = templates;
-      }
-
-      if (Object.keys(settings).length === 0 && settingsModalState.lockedSettings.length === 0) {
-        showToast('No settings to push', 'info');
+    function renderEvents() {
+      const list = document.getElementById('eventList');
+      if (!events.length) {
+        list.innerHTML = '<div class="event">No command activity in this browser session.</div>';
         return;
       }
-
-      try {
-        await postJSON('/api/admin/settings', {
-          software_id: softwareId,
-          settings: Object.keys(settings).length > 0 ? settings : undefined,
-          locked_settings: settingsModalState.lockedSettings,
-        });
-        showToast('Settings pushed! Will apply on next heartbeat.', 'success');
-        document.getElementById('settingsPendingBadge').style.display = 'inline-flex';
-      } catch (err) {
-        showToast('Failed to push settings: ' + (err.message || 'Unknown error'), 'error');
-      }
+      list.innerHTML = events.map(e => `
+        <div class="event"><strong>${escapeHtml(e.title)}</strong><br>${escapeHtml(e.body)}<br>${escapeHtml(e.at)}</div>
+      `).join('');
     }
 
-    document.getElementById('pushSettingsBtn').addEventListener('click', pushSettings);
-
-    // ═══════════════════════════════════════════════════════
-
-    async function apiList(){
-      const res = await fetch('/api/admin/list', { method: 'GET' });
-      if(!res.ok){
-        const err = await res.json().catch(()=>({}));
-        throw new Error(err.error || 'Failed to fetch list');
-      }
-      return await res.json();
+    async function apiList() {
+      const res = await fetch('/api/admin/list');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'List failed');
+      return data.softwares || {};
     }
 
-    async function postJSON(url, body){
+    async function postJSON(url, body) {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body || {}),
       });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok){
-        throw new Error(data.error || 'Request failed');
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Request failed');
       return data;
     }
 
-    function computeStats(softwaresDict){
-      const values = Object.values(softwaresDict || {});
-      let total = values.length;
-      let active = values.filter(s => s.status === 'active').length;
-      let killed = values.filter(s => s.status === 'killed').length;
-      let lastTs = null;
-      for(const s of values){
-        if(typeof s.last_seen === 'number'){
-          if(lastTs === null || s.last_seen > lastTs) lastTs = s.last_seen;
-        }
+    function getFilteredMachines() {
+      let list = Object.values(softwares || {});
+      if (filterStatus !== 'all') {
+        list = list.filter(m => displayStatus(m) === filterStatus);
       }
+      if (searchText) {
+        const q = searchText.toLowerCase();
+        list = list.filter(m => [
+          m.software_id, m.machine_name, m.ip_address, m.os_name, m.version, m.status
+        ].some(v => String(v || '').toLowerCase().includes(q)));
+      }
+      list.sort((a, b) => {
+        if (sortMode === 'name') return String(a.machine_name || '').localeCompare(String(b.machine_name || ''));
+        if (sortMode === 'status') return String(displayStatus(a)).localeCompare(String(displayStatus(b)));
+        return Number(b.last_seen || 0) - Number(a.last_seen || 0);
+      });
+      return list;
+    }
+
+    function computeMetrics() {
+      const list = Object.values(softwares || {});
       return {
-        total,
-        active,
-        killed,
-        lastActivity: lastTs ? minutesAgo(lastTs) : '--'
+        total: list.length,
+        online: list.filter(m => m.online).length,
+        active: list.filter(m => displayStatus(m) === 'active').length,
+        paused: list.filter(m => displayStatus(m) === 'paused').length,
+        killed: list.filter(m => displayStatus(m) === 'killed').length,
+        pending: list.reduce((sum, m) => sum + Number(m.pending_count || 0), 0),
       };
     }
 
-    function render(){
-      // stats
-      const stats = computeStats(softwares);
-      document.getElementById('statTotal').textContent = stats.total;
-      document.getElementById('statActive').textContent = stats.active;
-      document.getElementById('statKilled').textContent = stats.killed;
-      document.getElementById('statLastActivity').textContent = stats.lastActivity;
+    function renderMetrics() {
+      const m = computeMetrics();
+      document.getElementById('mTotal').textContent = m.total;
+      document.getElementById('mOnline').textContent = m.online;
+      document.getElementById('mActive').textContent = m.active;
+      document.getElementById('mPaused').textContent = m.paused;
+      document.getElementById('mKilled').textContent = m.killed;
+      document.getElementById('mPending').textContent = m.pending;
+    }
 
-      // Filter and Sort softwares list
-      let list = Object.values(softwares || {});
+    function machineCard(machine) {
+      const id = String(machine.software_id || '');
+      const status = displayStatus(machine);
+      const name = machine.machine_name || id || 'Unknown machine';
+      const last = timeLabel(machine.last_seen);
+      const pauseInfo = status === 'paused' ? `<div><div class="k">Pause</div><div class="v">${escapeHtml(pauseLabel(machine.pause_until))}</div></div>` : '';
+      const pending = Number(machine.pending_count || 0);
+      const locked = Number(machine.locked_count || 0);
+      return `
+        <article class="machine ${escapeHtml(status)} ${machine.online ? '' : 'offline'}" data-machine-id="${escapeHtml(id)}">
+          <div class="machine-head">
+            <div>
+              <div class="machine-name">${escapeHtml(name)}</div>
+              <div class="machine-id">${escapeHtml(id)}</div>
+            </div>
+            <span class="badge ${escapeHtml(status)}"><span class="dot"></span>${escapeHtml(statusLabel(status))}</span>
+          </div>
+          <div class="kv">
+            <div><div class="k">Version</div><div class="v">${escapeHtml(machine.version || '--')}</div></div>
+            <div><div class="k">IP</div><div class="v">${escapeHtml(machine.ip_address || '--')}</div></div>
+            <div><div class="k">OS</div><div class="v">${escapeHtml(machine.os_name || '--')}</div></div>
+            <div><div class="k">Heartbeat</div><div class="v">${escapeHtml(last)}</div></div>
+            <div><div class="k">Pending</div><div class="v">${pending} setting${pending === 1 ? '' : 's'}</div></div>
+            <div><div class="k">Locks</div><div class="v">${locked} lock${locked === 1 ? '' : 's'}</div></div>
+            ${pauseInfo}
+          </div>
+          <div class="card-actions">
+            <button class="good" data-action="activate" data-id="${escapeHtml(id)}" type="button">Activate</button>
+            <button class="warn" data-action="pause" data-id="${escapeHtml(id)}" type="button">Pause</button>
+            <button class="danger" data-action="kill" data-id="${escapeHtml(id)}" type="button">Kill</button>
+            <button data-action="settings" data-id="${escapeHtml(id)}" type="button">Settings</button>
+            <button data-action="update" data-id="${escapeHtml(id)}" type="button">Update</button>
+            <button data-action="clear" data-id="${escapeHtml(id)}" type="button">Clear</button>
+          </div>
+          <div class="note-row">
+            <label for="note-${domId(id)}">Notes</label>
+            <textarea id="note-${domId(id)}" data-note-id="${escapeHtml(id)}" placeholder="Admin note">${escapeHtml(machine.notes || '')}</textarea>
+          </div>
+        </article>
+      `;
+    }
 
-      // Filter by Status Tab
-      if (currentFilter !== 'all') {
-        list = list.filter(s => s.status === currentFilter);
+    function renderMachines() {
+      renderMetrics();
+      const list = getFilteredMachines();
+      const grid = document.getElementById('machineGrid');
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty">No machines match the current filters.</div>';
+        return;
       }
+      grid.innerHTML = list.map(machineCard).join('');
+    }
 
-      // Filter by Search Query
-      if (currentSearchQuery) {
-        const q = currentSearchQuery.toLowerCase();
-        list = list.filter(s => 
-          (s.machine_name || '').toLowerCase().includes(q) ||
-          (s.software_id || '').toLowerCase().includes(q) ||
-          (s.ip_address || '').toLowerCase().includes(q) ||
-          (s.os_name || '').toLowerCase().includes(q)
-        );
+    async function refresh() {
+      softwares = await apiList();
+      document.getElementById('lastRefresh').textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+      renderMachines();
+    }
+
+    function openActionModal(type, id) {
+      actionState = { type, id };
+      const machine = softwares[id] || {};
+      const title = type === 'pause' ? 'Pause BTPrint' : type === 'kill' ? 'Kill BTPrint' : 'Flag Update';
+      document.getElementById('actionTitle').textContent = title;
+      document.getElementById('actionSub').textContent = `${id} on ${machine.machine_name || 'unknown machine'}`;
+      const body = document.getElementById('actionBody');
+      if (type === 'pause') {
+        body.innerHTML = `
+          <label class="hint" for="pauseMinutes">Pause minutes</label>
+          <input class="field" id="pauseMinutes" type="number" min="0" step="1" value="30" />
+          <label class="hint" for="pauseReason">Reason</label>
+          <input class="field" id="pauseReason" type="text" placeholder="Maintenance window" />
+        `;
+      } else if (type === 'kill') {
+        body.innerHTML = `
+          <label class="hint" for="killReason">Reason</label>
+          <input class="field" id="killReason" type="text" placeholder="Emergency stop" />
+        `;
+      } else {
+        body.innerHTML = `
+          <label class="hint" for="updateUrl">Update URL</label>
+          <input class="field" id="updateUrl" type="url" placeholder="https://example.com/update.zip" />
+        `;
       }
+      document.getElementById('actionModal').classList.add('open');
+    }
 
-      // Sort
-      list.sort((a, b) => {
-        if (currentSort === 'name') {
-          return (a.machine_name || '').localeCompare(b.machine_name || '');
-        } else if (currentSort === 'id') {
-          return (a.software_id || '').localeCompare(b.software_id || '');
-        } else {
-          return (b.last_seen || 0) - (a.last_seen || 0);
+    async function confirmAction() {
+      if (!actionState) return;
+      const { type, id } = actionState;
+      if (type === 'pause') {
+        const pause_minutes = Number(document.getElementById('pauseMinutes').value || 0);
+        const reason = document.getElementById('pauseReason').value.trim();
+        await postJSON('/api/admin/pause', { software_id: id, pause_minutes, reason });
+      } else if (type === 'kill') {
+        const reason = document.getElementById('killReason').value.trim();
+        await postJSON('/api/admin/kill', { software_id: id, reason });
+      } else {
+        const update_url = document.getElementById('updateUrl').value.trim();
+        if (!update_url) throw new Error('Update URL is required');
+        await postJSON('/api/admin/update', { software_id: id, update_url });
+      }
+      closeModal('actionModal');
+      pushEvent(type.toUpperCase(), id);
+      toast('Command sent');
+      await refresh();
+    }
+
+    async function openSettings(id) {
+      settingsState = { id, current: {}, pending: {}, locked: [] };
+      document.getElementById('settingsSub').textContent = id;
+      document.getElementById('settingsHint').textContent = 'Loading current and pending values.';
+      document.getElementById('settingsForm').innerHTML = '';
+      document.getElementById('settingsModal').classList.add('open');
+      const res = await fetch('/api/admin/settings/' + encodeURIComponent(id));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Settings load failed');
+      settingsState.current = data.current_settings || {};
+      settingsState.pending = data.pending_settings || {};
+      settingsState.locked = data.locked_settings || [];
+      document.getElementById('settingsHint').textContent = Object.keys(settingsState.pending || {}).length
+        ? 'Pending values detected.'
+        : 'No pending values.';
+      renderSettingsForm();
+    }
+
+    function renderSettingsForm() {
+      const form = document.getElementById('settingsForm');
+      form.innerHTML = SETTINGS_FIELDS.map(field => {
+        const pending = getNested(settingsState.pending, field.key);
+        const current = getNested(settingsState.current, field.key);
+        const value = pending || current;
+        const locked = settingsState.locked.includes(field.key) || settingsState.locked.includes(field.key.split('.')[0]);
+        const input = field.type === 'json'
+          ? `<textarea class="field" data-setting-key="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.placeholder)}">${escapeHtml(value)}</textarea>`
+          : `<input class="field" data-setting-key="${escapeHtml(field.key)}" type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(field.placeholder)}" />`;
+        return `
+          <div class="form-row">
+            <label>${escapeHtml(field.label)}</label>
+            <div>
+              ${input}
+              <div class="hint">Current: ${escapeHtml(current || '--')}</div>
+            </div>
+            <label class="lock"><input type="checkbox" data-lock-key="${escapeHtml(field.key)}" ${locked ? 'checked' : ''} /> Lock</label>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function pushSettings() {
+      if (!settingsState) return;
+      const settings = {};
+      const inputs = document.querySelectorAll('[data-setting-key]');
+      for (const input of inputs) {
+        const key = input.getAttribute('data-setting-key');
+        let value = input.value.trim();
+        if (!value) continue;
+        const field = SETTINGS_FIELDS.find(f => f.key === key);
+        if (field && field.type === 'json') {
+          try { value = JSON.parse(value); }
+          catch (err) {
+            input.focus();
+            throw new Error(`Invalid JSON for ${field.label}`);
+          }
         }
+        setNested(settings, key, value);
+      }
+      const locked = Array.from(document.querySelectorAll('[data-lock-key]:checked')).map(el => el.getAttribute('data-lock-key'));
+      await postJSON('/api/admin/settings', {
+        software_id: settingsState.id,
+        settings: Object.keys(settings).length ? settings : undefined,
+        locked_settings: locked,
       });
+      pushEvent('SETTINGS', settingsState.id);
+      toast('Settings queued for next heartbeat');
+      await openSettings(settingsState.id);
+      await refresh();
+    }
 
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
+    async function clearPending(id, clearLocks = false) {
+      await postJSON('/api/admin/clear_pending', { software_id: id, clear_locks: clearLocks });
+      pushEvent('CLEAR', clearLocks ? `${id}: pending and locks` : `${id}: pending only`);
+      toast('Pending queue cleared');
+      await refresh();
+      if (settingsState && settingsState.id === id) await openSettings(id);
+    }
 
-      if (list.length === 0) {
-        grid.innerHTML = '<div class="no-results">No softwares match the criteria.</div>';
-        document.getElementById('lastUpdatedText').textContent = timeNowStr();
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      if (id === 'actionModal') actionState = null;
+    }
+
+    document.addEventListener('click', async event => {
+      const close = event.target.closest('[data-close-modal]');
+      if (close) {
+        closeModal(close.getAttribute('data-close-modal'));
         return;
       }
 
-      for(const software of list){
-        const softwareKey = String(software.software_id || '');
-        const softwareId = safeStr(softwareKey);
-        const softwareDomId = domId(softwareKey);
-        const softwareJs = jsArg(softwareKey);
-        const machineName = safeStr(software.machine_name);
-        const version = safeStr(software.version);
-        const osName = safeStr(software.os_name);
-        const ipAddress = safeStr(software.ip_address);
-        const lastSeenFull = software.last_seen ? new Date(software.last_seen*1000).toLocaleString() : '—';
-        const notesValue = escapeHtml(notes[softwareKey] || '');
-
-        const card = document.createElement('div');
-        card.className = `soft-card card-${software.status}`;
-        card.innerHTML = `
-          <div class="soft-top">
-            <div>
-              <div class="soft-name">${machineName}</div>
-              <div class="sub" style="margin-top:6px;">ID: ${softwareId}</div>
-            </div>
-            ${statusBadge(software.status)}
-          </div>
-
-          <div class="info-grid">
-            <div class="info"><div class="k">Machine name</div><div class="v">${machineName}</div></div>
-            <div class="info"><div class="k">Version</div><div class="v">${version}</div></div>
-            <div class="info"><div class="k">OS name</div><div class="v">${osName}</div></div>
-            <div class="info"><div class="k">IP Address</div><div class="v">${ipAddress}</div></div>
-            <div class="info info-last"><div class="k">Last Seen</div><div class="v">${lastSeenFull}</div></div>
-          </div>
-
-          <div class="note">
-            <div class="k-row">
-              <div class="k">Notes / Remarks</div>
-              <div class="save-indicator" id="save-${softwareDomId}">Saved</div>
-            </div>
-            <textarea placeholder="Write administrative remark..." data-software-id="${escapeAttr(softwareKey)}" data-software-dom-id="${softwareDomId}">${notesValue}</textarea>
-          </div>
-
-          <div class="btn-row">
-            <button class="btn btn-kill" type="button" onclick="openModal('killModal', '${softwareJs}')">Kill</button>
-            <button class="btn btn-activate" type="button" id="act-${softwareDomId}">Activate</button>
-            <button class="btn btn-update" type="button" onclick="openModal('updateModal', '${softwareJs}')">Push Update</button>
-            <button class="btn btn-settings" type="button" onclick="openSettingsModal('${softwareId}')">⚙️ Settings</button>
-          </div>
-        `;
-
-        // Wire notes textarea autosave
-        const ta = card.querySelector('textarea[data-software-dom-id="'+softwareDomId+'"]');
-        const indicator = card.querySelector(`#save-${softwareDomId}`);
-        let debounceTimer = null;
-        
-        ta.addEventListener('input', (e) => {
-          indicator.textContent = 'Saving...';
-          indicator.className = 'save-indicator saving';
-          
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(async () => {
-            const newNote = e.target.value;
-            notes[softwareKey] = newNote;
-            try {
-              await postJSON('/api/admin/save_notes', { software_id: softwareKey, notes: newNote });
-              indicator.textContent = 'Saved';
-              indicator.className = 'save-indicator saved';
-            } catch(err) {
-              indicator.textContent = 'Error';
-              indicator.className = 'save-indicator';
-              console.error(err);
-            }
-          }, 800);
-        });
-
-        // Wire activate button
-        card.querySelector(`#act-${softwareDomId}`).addEventListener('click', async () => {
-          try {
-            await postJSON('/api/admin/activate', { software_id: softwareKey });
-            showToast(`Process ${softwareKey} status updated to Active`, 'success');
-            await refresh();
-          } catch(err) {
-            showToast(err.message || 'Activation failed', 'error');
-          }
-        });
-
-        const settingsBtn = card.querySelector('.btn-settings');
-        settingsBtn.removeAttribute('onclick');
-        settingsBtn.addEventListener('click', () => openSettingsModal(softwareKey));
-
-        grid.appendChild(card);
-      }
-
-      // update time in header
-      document.getElementById('lastUpdatedText').textContent = timeNowStr();
-    }
-
-    async function refresh(){
+      const actionButton = event.target.closest('[data-action]');
+      if (!actionButton) return;
+      const action = actionButton.getAttribute('data-action');
+      const id = actionButton.getAttribute('data-id');
       try {
-        const payload = await apiList();
-        softwares = payload.softwares || {};
-        // Sync local notes
-        for(const s of Object.values(softwares)){
-          notes[s.software_id] = s.notes || '';
+        if (action === 'activate') {
+          await postJSON('/api/admin/activate', { software_id: id });
+          pushEvent('ACTIVATE', id);
+          toast('Machine activated');
+          await refresh();
+        } else if (action === 'pause' || action === 'kill' || action === 'update') {
+          openActionModal(action, id);
+        } else if (action === 'settings') {
+          await openSettings(id);
+        } else if (action === 'clear') {
+          await clearPending(id, false);
         }
-        render();
-      } catch (e) {
-        console.error(e);
-        document.getElementById('lastUpdatedText').textContent = 'Fetch failed';
-      }
-    }
-
-    // Wire Control Panel Listeners
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      currentSearchQuery = e.target.value;
-      render();
-    });
-
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-        e.target.classList.add('active');
-        currentFilter = e.target.getAttribute('data-filter');
-        render();
-      });
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', (e) => {
-      currentSort = e.target.value;
-      render();
-    });
-
-    // Close modals on clicking backdrop
-    window.addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-backdrop')) {
-        e.target.classList.remove('open');
+      } catch (err) {
+        toast(err.message || 'Command failed');
       }
     });
 
-    // Initial paint and poll
-    render();
-    refresh();
-    
-    // Auto-refresh loop (every 10 seconds)
-    setInterval(refresh, 10000);
+    document.addEventListener('input', event => {
+      const note = event.target.closest('[data-note-id]');
+      if (!note) return;
+      const id = note.getAttribute('data-note-id');
+      clearTimeout(notesTimers.get(id));
+      notesTimers.set(id, setTimeout(async () => {
+        try { await postJSON('/api/admin/save_notes', { software_id: id, notes: note.value }); }
+        catch (err) { toast('Note save failed'); }
+      }, 700));
+    });
+
+    document.getElementById('actionConfirm').addEventListener('click', async () => {
+      try { await confirmAction(); }
+      catch (err) { toast(err.message || 'Command failed'); }
+    });
+    document.getElementById('pushSettingsBtn').addEventListener('click', async () => {
+      try { await pushSettings(); }
+      catch (err) { toast(err.message || 'Settings failed'); }
+    });
+    document.getElementById('clearPendingBtn').addEventListener('click', async () => {
+      try { if (settingsState) await clearPending(settingsState.id, false); }
+      catch (err) { toast(err.message || 'Clear failed'); }
+    });
+    document.getElementById('clearPendingLocksBtn').addEventListener('click', async () => {
+      try { if (settingsState) await clearPending(settingsState.id, true); }
+      catch (err) { toast(err.message || 'Clear failed'); }
+    });
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      try { await refresh(); toast('Refreshed'); }
+      catch (err) { toast(err.message || 'Refresh failed'); }
+    });
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+      filterStatus = 'all';
+      searchText = '';
+      document.getElementById('statusFilter').value = 'all';
+      document.getElementById('searchInput').value = '';
+      renderMachines();
+    });
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+      filterStatus = 'all';
+      searchText = '';
+      sortMode = 'recent';
+      document.getElementById('statusFilter').value = 'all';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('sortSelect').value = 'recent';
+      renderMachines();
+    });
+    document.getElementById('statusFilter').addEventListener('change', event => {
+      filterStatus = event.target.value;
+      renderMachines();
+    });
+    document.getElementById('sortSelect').addEventListener('change', event => {
+      sortMode = event.target.value;
+      renderMachines();
+    });
+    document.getElementById('searchInput').addEventListener('input', event => {
+      searchText = event.target.value.trim();
+      renderMachines();
+    });
+
+    renderEvents();
+    renderMachines();
+    refresh().catch(err => toast(err.message || 'Initial refresh failed'));
+    setInterval(() => refresh().catch(() => {}), 15000);
   </script>
 </body>
 </html>
